@@ -62,12 +62,12 @@ function extractData(codeJson) {
 function funcDeclHandler(funcJson) {
     var ans = [];
     ans.push(
-        create_new_elem(funcJson.loc.start.line,funcJson.type,funcJson.id.name,'', '')
+        create_new_elem(funcJson.loc.start.line,funcJson.type,funcJson.id.name,'', '', funcJson.loc)
     );
     for (var i = 0; i < funcJson.params.length; i++) {
         var param = funcJson.params[i];
         ans.push(
-            create_new_elem(param.loc.start.line,'Param',param.name,'', '')
+            create_new_elem(param.loc.start.line,'Param',param.name,'', '',param.loc)
         );
     }
     return ans;
@@ -87,7 +87,8 @@ function varDeclHandler(verDecJson) {
                 declerators[i].type,
                 declerators[i].id.name,
                 value,
-                '')
+                '',
+                declerators[i].loc)
         );
     }
     return ans;
@@ -101,7 +102,8 @@ function exspStatHandler(expStatJson) {
             expStatJson.expression.type,
             handleExp(expStatJson.expression.left),
             handleExp(expStatJson.expression.right),
-            ''
+            '',
+            expStatJson.loc
         )
     );
     return ans;
@@ -115,7 +117,8 @@ function updateStatHandler(updateJson){
             updateJson.type,
             handleExp(updateJson.argument),
             handleExp(updateJson),
-            ''
+            '',
+            updateJson.loc
         )
     );
     return ans;
@@ -131,7 +134,8 @@ function whileHandler(whileJson) {
             whileJson.type,
             '',
             '',
-            condition
+            condition,
+            whileJson.loc
         )
     );
     return ans;
@@ -148,7 +152,8 @@ function forHandler(forJson) {
             forJson.type,
             '',
             '',
-            condition
+            condition,
+            forJson.loc
         )
     );
     return ans;
@@ -164,7 +169,8 @@ function ifHandler(ifJson) {
             ifJson.type,
             '',
             '',
-            condition
+            condition,
+            ifJson.loc
         )
     );
     ans.push.apply(ans ,ifAlternateHandler(ifJson));
@@ -181,7 +187,7 @@ function ifAlternateHandler(ifJson) {
         let type = ( (condition == '') ? 'else statement' : 'else if statement');
         let start_line = ( (type == 'else statement') ? alternate.loc.start.line-1 : alternate.loc.start.line);
         ans.push(
-            create_new_elem(start_line,type,'','',condition)
+            create_new_elem(start_line,type,'','',condition, alternate.loc)
         );
         alternate = alternate.alternate;
     }
@@ -196,7 +202,8 @@ function retHandler(retJson) {
             retJson.type,
             '',
             handleExp(retJson.argument),
-            ''
+            '',
+            retJson.loc
         )
     );
     return ans;
@@ -278,7 +285,7 @@ function identifierHandler(exp) {
 }
 
 //Function that creates an element given it's neccesary details
-function create_new_elem(line, type, name, value, condition){
+function create_new_elem(line, type, name, value, condition, loc){
     var type_actual = type;
     if(type in dict_type_type_name){
         type_actual =  dict_type_type_name[type];
@@ -288,7 +295,8 @@ function create_new_elem(line, type, name, value, condition){
         Type: type_actual,
         Name: name,
         Condition: condition,
-        Value: value
+        Value: value,
+        loc: loc
     };
 }
 

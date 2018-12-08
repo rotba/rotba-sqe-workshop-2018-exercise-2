@@ -26,10 +26,10 @@ var line_1 = 7;
 var def_1 = getDefinitions(line_1, data_1);
 describe('The data flow analayzer', () => {
     it('is finding  def clear path in a simple function', () => {
-        assert.equal(def_1.id, 'c');
-        assert.equal(def_1.loc.line, 7);
-        assert.equal(def_1.loc.col, 9);
-        assert.equal(def_1.value, 'c + 5');
+        assert.equal(def_1[0].id, 'c');
+        assert.equal(def_1[0].loc.start.line, 7);
+        assert.equal(def_1[0].loc.start.column, 8);
+        assert.equal(def_1[0].Value, 'c + 5');
     });
 });
 
@@ -41,13 +41,14 @@ var codeJson_2 = parseCode(codeString_2);
 var data_2 = extractData(codeJson_2);
 var line_2 = 2;
 var def_2 = getDefinitions(line_2, data_2);
-var dcps_2 = findDCPs(line_2, def_2 ,data_2);
+var dcps_2 = findDCPs(line_2, def_2[0] ,data_2);
 describe('The data flow analayzer', () => {
     it('is finding  def clear path in a simple function', () => {
         assert.equal(dcps_2[0].definition.id, 'x');
-        assert.equal(dcps_2[0].definition.val, '0');
-        assert.equal(dcps_2[0].definition.line, '2');
+        assert.equal(dcps_2[0].definition.Value, '0');
+        assert.equal(dcps_2[0].definition.loc.start, 2);
         assert.equal(dcps_2[0].node.id, 'x');
-        assert.equal(dcps_2[0].node.id, '3');
+        assert.equal(dcps_2[0].node.loc.start.line, 3);
+        assert.equal(dcps_2[0].node.loc.start.column, 4);
     });
 });
