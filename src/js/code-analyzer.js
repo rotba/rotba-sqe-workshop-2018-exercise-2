@@ -278,7 +278,7 @@ function identifierHandler(exp) {
 }
 
 //Function that creates an element given it's neccesary details
-function create_new_elem(line, type, name, value, condition, loc){
+function create_new_elem(line, type, name, value, condition){
     var type_actual = type;
     if(type in dict_type_type_name){
         type_actual =  dict_type_type_name[type];
@@ -288,8 +288,7 @@ function create_new_elem(line, type, name, value, condition, loc){
         Type: type_actual,
         Name: name,
         Condition: condition,
-        Value: value,
-        loc: loc
+        Value: value
     };
 }
 
