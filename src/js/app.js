@@ -15,7 +15,7 @@ $(document).ready(function () {
         storeData(data_array);
         var table = document.getElementById('myTable');
         data_array.sort(function(a, b){return a['Line']-b['Line'];});
-        var substituted = substitute(data_array);
+        var substituted = substitute(data_array, codeToParse);
         insertData(data_array, table);
 
     });

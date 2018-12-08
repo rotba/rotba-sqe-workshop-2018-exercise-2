@@ -248,15 +248,15 @@ function bExspHandler(exp) {
         brackets[3] = ')';
     }
     ans = ans.concat(
-        brackets[0], handleExp(exp.left), brackets[1],
+        brackets[0], ' ',handleExp(exp.left),' ',brackets[1],
         ' ', exp.operator, ' ',
-        brackets[2], handleExp(exp.right), brackets[3]);
+        brackets[2],' ',handleExp(exp.right),' ', brackets[3]);
     return ans;
 }
 
 function mExspHandler(exp) {
     var ans = '';
-    ans = ans.concat(handleExp(exp.object), '[', handleExp(exp.property), ']');
+    ans = ans.concat(handleExp(exp.object), '[ ', handleExp(exp.property), ' ]');
     return ans;
 }
 
@@ -268,7 +268,7 @@ function uExspHandler(exp) {
 
 function updateExspHandler(exp) {
     var ans = '';
-    ans = ans.concat(exp.operator, handleExp(exp.argument));
+    ans = ans.concat(exp.operator,handleExp(exp.argument));
     return ans;
 }
 
