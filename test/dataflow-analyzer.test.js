@@ -3,6 +3,7 @@ import {parseCode} from '../src/js/code-analyzer';
 import {extractData} from '../src/js/code-analyzer';
 import {findDCPs} from '../src/js/dataflow-analyzer';
 import {getDefinitions} from '../src/js/dataflow-analyzer';
+import {getGlobalDefs} from '../src/js/dataflow-analyzer';
 import {getUses} from '../src/js/dataflow-analyzer';
 import {isFeasible} from '../src/js/dataflow-analyzer';
 
@@ -107,3 +108,94 @@ describe('The data flow analayzer', () => {
         assert.equal(dcps_4[0].node.loc.start.column, 4);
     });
 });
+
+
+var codeString_5 = `function foo(x){
+    let a = x + 1;
+    if (a < x) {
+        a = a + 5;
+        return a;
+    }
+}
+`;
+var codeJson_5 = parseCode(codeString_5);
+var data_5 = extractData(codeJson_5);
+var glbl_feds_5 = getGlobalDefs(data_5, codeString_5);
+console.log(glbl_feds_5[0]);
+describe('The data flow analayzer', () => {
+    it('is extracting the global defs properly', () => {
+        assert.equal(glbl_feds_5.length, 3);
+        assert.equal(glbl_feds_5[0].node.id, 'a');
+        assert.equal(glbl_feds_5[2].node.id, 'a');
+        assert.equal(glbl_feds_5[0].def.Value, ' x  +  1 ');
+        assert.equal(glbl_feds_5[2].def.Value, ' a  +  5 ');
+    });
+});
+/*
+var codeString_6 = `function foo(x){
+    let a = x + 1;
+    if (a < x) {
+        a = a + 5;
+        return a;
+    }
+}
+`;
+
+var expected_6 = 'function foo(x){\n' +
+    '    if (x + 1 < x) {\n' +
+    '        return x + 1 + x + 1 + 5;\n' +
+    '    }\n' +
+    '}\n';
+
+
+var codeJson_6 = parseCode(codeString_5);
+var data_6 = extractData(codeJson_5);
+var glbl_feds_m1 = getGlobalDefs(data_5, codeString_5);
+var res_6 = substitute(glbl_feds_m1,data_m1, codeString__m1);
+
+describe('The data flow analayzer', () => {
+    it('is substituting properly', () => {
+        assert.equal(res_5, expected_5);
+    });
+});
+
+
+
+
+var codeString_m1 = `function foo(x, y, z){
+    let a = x + 1;
+    let b = a + y;
+    let c = 0;
+    
+    if (b < z) {
+        c = c + 5;
+        return x + y + z + c;
+    } else if (b < z * 2) {
+        c = c + x + 5;
+        return x + y + z + c;
+    } else {
+        c = c + z + 5;
+        return x + y + z + c;
+    }
+}
+`;
+var expected_m1 = 'function foo(x, y, z){\n' +
+    '    if (x + 1 + y < z) {\n' +
+    '        return x + y + z + 5;\n' +
+    '    } else if (x + 1 + y < z * 2) {\n' +
+    '        return x + y + z + x + 5;\n' +
+    '    } else {\n' +
+    '        return x + y + z + z + 5;\n' +
+    '    }\n' +
+    '}\n';
+var codeJson_m1 = parseCode(codeString__m1);
+var data_m1 = extractData(codeJson_m1);
+var glbl_feds_m1 = getGlobalDefs(data_m1, codeString__m1);
+var res = substitute(glbl_feds_m1,data_m1, codeString__m1);
+
+describe('The data flow analayzer', () => {
+    it('is substituting properly', () => {
+        assert.equal(res, expected_m1);
+    });
+});
+*/

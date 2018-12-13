@@ -79,7 +79,7 @@ function varDeclHandler(verDecJson) {
     for (var i = 0; i < declerators.length; i++) {
         var value = null;
         if(declerators[i].init != null){
-            value = declerators[i].init.value;
+            value = handleExp(declerators[i].init);
         }
         ans.push(
             create_new_elem(

@@ -1,12 +1,24 @@
 import {extractData, parseCode} from './code-analyzer';
 
-function substitute(data, codeString){
-    var def_line_1 = 2;
-    var def_4 = getDefinitions(def_line_1, data.slice())[0];
-    var dcps_4 = findDCPs(def_4, data, codeString);
+
+function substitute(data, codeString, global_defs){
+    var codeJson = parseCode(codeString);
+    var glbl_feds_m1 = getGlobalDefs(data, codeString);
     var x = 1;
 
 }
+function getGlobalDefs(data, codeString) {
+    var ans = [] ;
+    var arrayOfLines = codeString.match(/[^\r\n]+/g);
+    for (var i = 0; i < arrayOfLines.length; i++) {
+        var defs = getDefinitions(i+1, data.slice());
+        for (var j = 0; j < defs.length; j++) {
+            ans.push.apply(ans ,findDCPs(defs[j], data, codeString));
+        }
+    }
+    return ans;
+}
+
 function findDCPs(def, data, codeString) {
     var ans = [];
     var left_most = {
@@ -20,7 +32,7 @@ function findDCPs(def, data, codeString) {
             if(uses[i].Value ==null){
                 ans.push({def:def, node:uses[i]});
             }
-            if(isDefinition(uses[i])){
+            if(isDefinitionUse(uses[i])){
                 left_most = getScopeEnd(left_most, codeString);
             }
         }
@@ -44,10 +56,10 @@ function getUses(id , line, data) {
     for (var i = 0; i < line_elements.length; i++) {
         var element =line_elements[i];
         if(isDefinition(element) && element.Name == id){
-            ans.push(createUse(element.Name, element.loc, element.Value));
+            ans.push(createUse(id, element.loc, element.Value));
         }
         if(is_c_use_in_element(id, element) || is_p_use_in_element(id, element)){
-            ans.push(createUse(element.Name, element.loc, null));
+            ans.push(createUse(id, element.loc, null));
         }
     }
     return ans;
@@ -58,6 +70,10 @@ function isDefinition(element) {
     var isAssignment = element.Type == 'assignment expression';
     var isDeclerationWithAssignment = element.Type == 'variable declaration' && element.Value!=null;
     return isAssignment || isDeclerationWithAssignment;
+}
+
+function isDefinitionUse(use) {
+    return use.Value!=null;
 }
 
 function is_c_use_in_element(id, element){
@@ -97,7 +113,7 @@ function isFeasible(loc_1, loc_2, codeString){
             j =0;
         }
         for(j; j < arrayOfLines[i].length;j++){
-            if(i == loc_2.start.line -1 && j == loc_2.end.column-2){
+            if(reachedLoc(i +1, j, loc_2)){
                 return true;
             }
             curr_char = arrayOfLines[i][j];
@@ -112,16 +128,24 @@ function isFeasible(loc_1, loc_2, codeString){
         }
     }
 }
+
+function reachedLoc(i, j, loc_2) {
+    if(i == loc_2.start.line  && j == loc_2.start.column-2){
+        return true;
+    }
+}
+
 function getScopeEnd(loc, codeString){
+    var arrayOfLines = codeString.match(/[^\r\n]+/g);
     var i = loc.start.line-1;
     var j = loc.start.column;
     var curr_char;
-    for(i; i < loc.start.line;i++) {
+    for(i; i < arrayOfLines.length;i++) {
         if(i != loc.start.line-1){
             j =0;
         }
-        for(j; j <= loc[i].length;j++){
-            curr_char = codeString[i][j];
+        for(j; j < arrayOfLines[i].length;j++){
+            curr_char = arrayOfLines[i][j];
             if(curr_char == '}'){
                 loc.start.line = i+1;
                 loc.start.column = j;
@@ -131,6 +155,7 @@ function getScopeEnd(loc, codeString){
     }
 }
 
+export {getGlobalDefs};
 export {findDCPs};
 export {getDefinitions};
 export {substitute};
