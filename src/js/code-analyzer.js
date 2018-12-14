@@ -182,10 +182,15 @@ function ifAlternateHandler(ifJson) {
     var ans = [];
     let alternate = ifJson.alternate;
     while(alternate != null){
-        ans.push.apply(ans , handleConsequent(alternate.consequent));
+        if(alternate.consequent == null){
+            ans.push.apply(ans , handleConsequent(alternate));
+        }else{
+            ans.push.apply(ans , handleConsequent(alternate.consequent));
+        }
+
         let condition = handleExp(alternate.test);
         let type = ( (condition == '') ? 'else statement' : 'else if statement');
-        let start_line = ( (type == 'else statement') ? alternate.loc.start.line-1 : alternate.loc.start.line);
+        let start_line = ( (type == 'else statement') ? alternate.loc.start.line : alternate.loc.start.line);
         ans.push(
             create_new_elem(start_line,type,'','',condition, alternate.loc)
         );

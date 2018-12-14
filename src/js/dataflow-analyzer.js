@@ -9,18 +9,21 @@ var LineTypesEnum = Object.freeze(
         'else if statement':'else if statement',
         'else statement':'else statement',
         'assignment expression': 'assignment expression',
-        'return statement': 'return statement'
+        'return statement': 'return statement',
+        'unknown': 'unknown'
     })
 var substitute_handlers = {
-    'return statement' : subRetHandler
+    'return statement' : subRetHandler,
+    'if statement' : subIfCondHandler,
+    'else if statement' : subIfCondHandler,
+    'while statement' : subIfCondHandler
 };
 
 var lineHandlers = {
-    //'DontTouch' : dontTouchLineHandler,
-    //'while statement' : whileLineHandler,
-    //'if statement' : ifLineHandler,
+    'while statement' : whileLineHandler,
+    'if statement' : ifLineHandler,
     //'else statement' : elseLineHandler,
-    //'else if statement' : elseIfLineHandler,
+    'else if statement' : elseIfLineHandler,
     //'assignment expression': assgnmentLineHandler,
     'return statement' : retLineHandler
 };
@@ -58,12 +61,14 @@ function substituteCode(codeString, substituted_data){
         var lineNum = i +1;
         var lineData = substituted_data.filter(element => (element.Line == lineNum));
         var lineType = getLineType(currLine, lineData);
-        if(lineType in lineHandlers){
+        if(lineType == 'DontTouch'){
+            ans.push(currLine);
+        }else if(lineType in lineHandlers){
             var newLine = lineHandlers[lineType](currLine, lineNum, lineData);
             ans.push(newLine);
         }
     }
-    return ans;
+    return ans.join('\n');
 }
 
 function getLineType(currLine, lineData) {
@@ -77,12 +82,13 @@ function getLineType(currLine, lineData) {
 function extractLineType(lineData) {
     var lineTypes = lineData.map(x => x.Type);
     var handleTypes = Object.keys(LineTypesEnum).filter(x => x!= 'DontTouch');
-    for (let i = 1; i < handleTypes.length; i++){
-        if(handleTypes[i] in lineTypes){
-            return LineTypesEnum[handleTypes];
+    for (let i = 0; i < handleTypes.length; i++){
+        var curr_type = handleTypes[i];
+        if(lineTypes.includes(curr_type)){
+            return LineTypesEnum[curr_type];
         }
     }
-    console.log('problem_extractLineType')
+    return LineTypesEnum['unknown'];
 }
 
 function dontTouchLine(lineData) {
@@ -90,10 +96,10 @@ function dontTouchLine(lineData) {
         return true;
     }
     var types = lineData.map(x => x.Type);
-    var dontTouchTypes = ['function declaration'];
+    var dontTouchTypes = ['function declaration', 'else statement'];
     for (let i = 0; i < types.length; i++) {
         var currType = types[i];
-        if(currType in dontTouchTypes){
+        if(dontTouchTypes.includes(currType)){
             return true;
         }
     }
@@ -103,6 +109,11 @@ function dontTouchLine(lineData) {
 function subRetHandler(data, subData, origElement, subElement, globalDefs, i) {
     var codeJson = esprima.parseScript(origElement.Value).body[0].expression;
     subElement.Value = escodegen.generate(substituteExp(codeJson, subData, i, globalDefs));
+}
+
+function subIfCondHandler(data, subData, origElement, subElement, globalDefs, i) {
+    var codeJson = esprima.parseScript(origElement.Condition).body[0].expression;
+    subElement.Condition = escodegen.generate(substituteExp(codeJson, subData, i, globalDefs));
 }
 
 function substituteExp(json, subData,i ,globalDefs) {
@@ -215,7 +226,7 @@ function isFeasible(loc_1, loc_2, codeString){
             j =0;
         }
         for(j; j < arrayOfLines[i].length;j++){
-            if(reachedLoc(i +1, j, loc_2)){
+            if(reachedLoc(i +1, j, loc_2, arrayOfLines[i])){
                 return true;
             }
             curr_char = arrayOfLines[i][j];
@@ -231,10 +242,13 @@ function isFeasible(loc_1, loc_2, codeString){
     }
 }
 
-function reachedLoc(i, j, loc_2) {
+function reachedLoc(i, j, loc_2, line) {
     if(i == loc_2.start.line  && j == loc_2.start.column-2){
         return true;
+    }else if(i == loc_2.start.line && j ==(line.length-1)){
+        return true;
     }
+    return false;
 }
 
 function getScopeEnd(loc, codeString){
@@ -257,18 +271,42 @@ function getScopeEnd(loc, codeString){
     }
 }
 
-
+function isLocal(identifier, subData, index) {
+    for (let i = index; i >= 0; i--) {
+        var currElement = subData[i];
+        if(currElement.Type == 'variable declaration'){
+            if(currElement.Name == identifier){
+                return true;
+            }
+        }else if(currElement.Type == 'function declaration'){
+            return false;
+        }
+    }
+    // variable is global
+    return false;
+}
 
 function identifierHandler(iExp , subData, i, globalDefs) {
-    var identifier = iExp.name;
-    var globalDef = getGlobalDef(identifier, subData, i ,globalDefs);
-    iExp.name = globalDef.Value;
-    return iExp;
+    if(isLocal(iExp.name, subData, i)){
+        var identifier = iExp.name;
+        var globalDef = getGlobalDef(identifier, subData, i ,globalDefs);
+
+        iExp = esprima.parseScript(globalDef.Value).body[0].expression;
+        return iExp;
+    }else{
+        return iExp;
+    }
+
 }
 
-function bExspHandler(bExp , subData, i) {
-
+function bExspHandler(bExp , subData, i, globalDefs) {
+    bExp.left = exphandlers[bExp.left.type](bExp.left , subData, i, globalDefs);
+    bExp.right = exphandlers[bExp.right.type](bExp.right , subData, i, globalDefs);
+    //bExp.right = exphandlers[bExp.right.type](bExp.right , subData, i, globalDefs);
+    return bExp;
 }
+
+
 function getGlobalDef(identifier, subData, index ,globalDefs){
     for (let i = 0; i < globalDefs.length ; i++){
         var currGlblDefNode = globalDefs[i].node;
@@ -278,16 +316,65 @@ function getGlobalDef(identifier, subData, index ,globalDefs){
             return globalDefs[i].def;
         }
     }
-    console.log('problem_getGlobalDef()');
 }
 
 function retLineHandler(currLine, lineNum, lineData){
     var ans = '';
-    var idxOfReturnEnd = currLine.lastIndexOf('return');
+    var idxOfReturnEnd = currLine.indexOf('return')+'return'.length;
     var retString = currLine.substring(0, idxOfReturnEnd);
     var retValue = lineData.filter(d => d.Type == 'return statement')[0].Value;
-    return ans.concat(retString, ' ', retValue);
+    while(retValue.includes('  ')){
+        retValue = retValue.replace('  ', ' ' );
+    }
+    return ans.concat(retString, ' ', retValue, ';');
 }
+
+function ifLineHandler(currLine, lineNum, lineData){
+    var ans = '';
+    currLine = currLine.replace('if (', 'if(' );
+    var idxOfIfEnd = currLine.indexOf('if(')+'if('.length;
+    var ifSrtStart = currLine.substring(0, idxOfIfEnd);
+    var ifSrtEnd = ') {';
+    var ifCond = lineData.filter(d => d.Type == 'if statement')[0].Condition;
+    while(ifCond.includes('  ')){
+        ifCond = ifCond.replace('  ', ' ' );
+    }
+    return ans.concat(ifSrtStart,  ifCond, ifSrtEnd);
+}
+
+function elseIfLineHandler(currLine, lineNum, lineData){
+    var ans = '';
+    var ifElseStr = 'else if(';
+    currLine =adaptIfElse(currLine, ifElseStr);
+    var idxOfIfEnd = currLine.indexOf(ifElseStr)+ifElseStr.length;
+    var ifSrtStart = currLine.substring(0, idxOfIfEnd);
+    var ifSrtEnd = ') {';
+    var ifCond = lineData.filter(d => d.Type == 'else if statement')[0].Condition;
+    while(ifCond.includes('  ')){
+        ifCond = ifCond.replace('  ', ' ' );
+    }
+    return ans.concat(ifSrtStart,  ifCond, ifSrtEnd);
+}
+
+function whileLineHandler(currLine, lineNum, lineData){
+    var ans = '';
+    currLine = currLine.replace('while (', 'while(' );
+    var idxOfWhileEnd = currLine.indexOf('while(')+'while('.length;
+    var whileSrtStart = currLine.substring(0, idxOfWhileEnd);
+    var whileSrtEnd = ') {';
+    var ifCond = lineData.filter(d => d.Type == 'while statement')[0].Condition;
+    while(ifCond.includes('  ')){
+        ifCond = ifCond.replace('  ', ' ' );
+    }
+    return ans.concat(whileSrtStart,  ifCond, whileSrtEnd);
+}
+
+function adaptIfElse(currLine, ifElseStr) {
+    currLine = currLine.replace('else if (', ifElseStr);
+    return currLine;
+}
+
+
 export {getGlobalDefs};
 export {findDCPs};
 export {getDefinitions};

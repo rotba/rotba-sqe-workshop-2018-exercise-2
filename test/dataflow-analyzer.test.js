@@ -124,7 +124,7 @@ var codeString_5 = `function foo(x){
 var codeJson_5 = parseCode(codeString_5);
 var data_5 = extractData(codeJson_5);
 var glbl_feds_5 = getGlobalDefs(data_5, codeString_5);
-console.log(glbl_feds_5[0]);
+
 describe('The data flow analayzer', () => {
     it('is extracting the global defs properly', () => {
         assert.equal(glbl_feds_5.length, 3);
@@ -150,7 +150,7 @@ var substituted_a = data_sub_6[3].Value;
 
 describe('The data flow analayzer', () => {
     it('is substituting properly', () => {
-        assert.equal(substituted_a, ' x  +  1 ');
+        assert.equal(substituted_a, 'x + 1');
     });
 });
 
@@ -163,8 +163,7 @@ var codeString_7 = `function foo(x){
 `;
 var expected_7 = 'function foo(x){\n' +
     '    return x + 1;\n' +
-    '}\n';
-
+    '}';
 
 var codeJson_7 = parseCode(codeString_7);
 var data_7 = extractData(codeJson_7);
@@ -177,39 +176,144 @@ describe('The data flow analayzer', () => {
         assert.equal(res_7, expected_7);
     });
 });
-
-/*
-var codeString_6 = `function foo(x){
+var codeString_8 =
+`function foo(x){
     let a = x + 1;
-    if (a < x) {
-        a = a + 5;
-        return a;
+    if(a<x){
+        return a+x;
     }
 }
 `;
-
-var expected_6 = 'function foo(x){\n' +
-    '    if (x + 1 < x) {\n' +
-    '        return x + 1 + x + 1 + 5;\n' +
+var expected_8 = 'function foo(x){\n' +
+    '    if(x + 1 < x) {\n' +
+    '        return x + 1 + x;\n' +
     '    }\n' +
-    '}\n';
+    '}';
 
-
-var codeJson_6 = parseCode(codeString_5);
-var data_6 = extractData(codeJson_5);
-var glbl_feds_m1 = getGlobalDefs(data_5, codeString_5);
-var res_6 = substitute(glbl_feds_m1,data_m1, codeString__m1);
+var codeJson_8 = parseCode(codeString_8);
+var data_8 = extractData(codeJson_8);
+var glbl_feds_8 = getGlobalDefs(data_8, codeString_8);
+var data_sub_8 = substituteData(glbl_feds_8,data_8);
+var res_8 = substituteCode(codeString_8, data_sub_8);
 
 describe('The data flow analayzer', () => {
     it('is substituting properly', () => {
-        assert.equal(res_5, expected_5);
+        assert.equal(res_8, expected_8);
+    });
+});
+var codeString_9 =
+    `function foo(x){
+    let a = x + 1;
+    if(a<x){
+        return a+x;
+    }
+    return a;
+}
+`;
+
+var codeJson_9 = parseCode(codeString_9);
+var data_9 = extractData(codeJson_9);
+var glbl_feds_9 = getGlobalDefs(data_9, codeString_9);
+
+describe('The data flow analayzer', () => {
+    it('is finding global defs properly', () => {
+        assert.equal(glbl_feds_9[2].node.id, 'a');
+        assert.equal(glbl_feds_9[2].def.Value, ' x  +  1 ');
     });
 });
 
+var codeString_10 =
+`function foo(x){
+    let a = x + 1;
+    if (a < x) {
+        return x + a;
+    } else {
+        return x*a;
+    }
+}`;
+var expected_10 =
+    'function foo(x){\n' +
+    '    if(x + 1 < x) {\n' +
+    '        return x + (x + 1);\n' +
+    '    } else {\n' +
+    '        return x * (x + 1);\n' +
+    '    }\n' +
+    '}';
 
+var codeJson_10 = parseCode(codeString_10);
+var data_10 = extractData(codeJson_10);
+var glbl_feds_10 = getGlobalDefs(data_10, codeString_10);
+var data_sub_10 = substituteData(glbl_feds_10,data_10);
+var res_10 = substituteCode(codeString_10, data_sub_10);
 
+describe('The data flow analayzer', () => {
+    it('is substituting properly', () => {
+        assert.equal(res_10, expected_10);
+    });
+});
 
-var codeString_m1 = `function foo(x, y, z){
+var codeString_11 =
+    `function foo(x){
+    let a = x + 1;
+    if (a < x) {
+        return x + a;
+    } else if( a < x){
+        return x*a;
+    }
+}`;
+var expected_11 =
+    'function foo(x){\n' +
+    '    if(x + 1 < x) {\n' +
+    '        return x + (x + 1);\n' +
+    '    } else if(x + 1 < x) {\n' +
+    '        return x * (x + 1);\n' +
+    '    }\n' +
+    '}';
+
+var codeJson_11 = parseCode(codeString_11);
+var data_11 = extractData(codeJson_11);
+var glbl_feds_11 = getGlobalDefs(data_11, codeString_11);
+var data_sub_11 = substituteData(glbl_feds_11,data_11);
+var res_11 = substituteCode(codeString_11, data_sub_11);
+
+describe('The data flow analayzer', () => {
+    it('is substituting properly', () => {
+        assert.equal(res_11, expected_11);
+    });
+});
+
+var codeString_12 =
+`function foo(z){
+    let b = z+1;
+    while (b < z) {
+        return b;
+    }
+    return z;
+}
+`;
+var expected_12 =
+    'function foo(z){\n' +
+    '    while(z + 1 < z) {\n' +
+    '        return z + 1;\n' +
+    '    }\n'+
+    '    return z;\n' +
+    '}'
+
+var codeJson_12 = parseCode(codeString_12);
+var data_12 = extractData(codeJson_12);
+var glbl_feds_12 = getGlobalDefs(data_12, codeString_12);
+var data_sub_12 = substituteData(glbl_feds_12,data_12);
+var res_12 = substituteCode(codeString_12, data_sub_12);
+
+describe('The data flow analayzer', () => {
+    it('is substituting properly while statement', () => {
+        assert.equal(res_12, expected_12);
+    });
+});
+
+/*
+var codeString_m1 =
+    `function foo(x, y, z){
     let a = x + 1;
     let b = a + y;
     let c = 0;
@@ -226,7 +330,8 @@ var codeString_m1 = `function foo(x, y, z){
     }
 }
 `;
-var expected_m1 = 'function foo(x, y, z){\n' +
+var expected_m1 =
+    'function foo(x, y, z){\n' +
     '    if (x + 1 + y < z) {\n' +
     '        return x + y + z + 5;\n' +
     '    } else if (x + 1 + y < z * 2) {\n' +
@@ -235,14 +340,17 @@ var expected_m1 = 'function foo(x, y, z){\n' +
     '        return x + y + z + z + 5;\n' +
     '    }\n' +
     '}\n';
-var codeJson_m1 = parseCode(codeString__m1);
+
+var codeJson_m1 = parseCode(codeString_m1);
 var data_m1 = extractData(codeJson_m1);
-var glbl_feds_m1 = getGlobalDefs(data_m1, codeString__m1);
-var res = substitute(glbl_feds_m1,data_m1, codeString__m1);
+var glbl_feds_m1 = getGlobalDefs(data_m1, codeString_m1);
+var data_sub_m1 = substituteData(glbl_feds_m1,data_m1);
+var res_m1 = substituteCode(codeString_m1, data_sub_m1);
 
 describe('The data flow analayzer', () => {
-    it('is substituting properly', () => {
-        assert.equal(res, expected_m1);
+    it('is substituting properly example 1', () => {
+        assert.equal(res_m1, expected_m1);
     });
 });
+
 */

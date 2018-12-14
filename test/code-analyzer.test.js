@@ -194,14 +194,14 @@ codeJson = parseCode(`function binarySearch(X, V, n){
 data = extractData(codeJson);
 var else_stat;
 for (i = 0; i < data.length; i++) {
-    if(data[i]['Type'] == 'else statement' && data[i]['Line'] == 11){
+    if(data[i]['Type'] == 'else statement' && data[i]['Line'] == 12){
         else_stat = data[i];
     }
 }
 
 describe('The javascript parser', () => {
     it('is extracting data from an else statement correctly', () => {
-        assert.equal(else_stat['Line'],11);
+        assert.equal(else_stat['Line'],12);
         assert.equal(else_stat['Type'],'else statement');
         assert.equal(else_stat['Name'],'');
         assert.equal(else_stat['Condition'],'');
@@ -353,6 +353,22 @@ describe('The javascript parser', () => {
     });
 });
 
+codeJson = parseCode(
+    `function foo(){
+	if(x >1){
+		return x;
+	}else{
+		return 2;
+	}
+}`);
+data = extractData(codeJson);
+data.sort(function(a, b){return a['Line']-b['Line'];});
+var sec_ret =data[4];
+describe('The javascript parser', () => {
+    it('is extracting else statemnt properly', () => {
+        assert.equal(sec_ret['Type'],'return statement');
+    });
+});
 
 
 
