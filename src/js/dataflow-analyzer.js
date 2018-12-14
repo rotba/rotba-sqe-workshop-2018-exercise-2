@@ -9,6 +9,7 @@ var LineTypesEnum = Object.freeze(
         'else if statement':'else if statement',
         'else statement':'else statement',
         'assignment expression': 'assignment expression',
+        'variable declaration': 'variable declaration',
         'return statement': 'return statement',
         'unknown': 'unknown'
     })
@@ -16,7 +17,9 @@ var substitute_handlers = {
     'return statement' : subRetHandler,
     'if statement' : subIfCondHandler,
     'else if statement' : subIfCondHandler,
-    'while statement' : subIfCondHandler
+    'while statement' : subIfCondHandler,
+    'assignment expression' : subAssginmentCondHandler,
+    'variable declaration' : subAssginmentCondHandler
 };
 
 var lineHandlers = {
@@ -111,13 +114,28 @@ function subRetHandler(data, subData, origElement, subElement, globalDefs, i) {
     subElement.Value = escodegen.generate(substituteExp(codeJson, subData, i, globalDefs));
 }
 
+function subAssginmentCondHandler(data, subData, origElement, subElement, globalDefs, i) {
+    var codeJson = esprima.parseScript(origElement.Value).body[0].expression;
+    subElement.Value = escodegen.generate(substituteExp(codeJson, subData, i, globalDefs));
+    updateGlobalDef(globalDefs, subData[i], subElement.Value);
+}
+function updateGlobalDef(globalDefs, element, Value) {
+    var relevantGlblDefs = globalDefs.filter(x => x.def.id == element.Name && x.def.loc.start.line ==element.Line);
+    for (let i = 0; i < relevantGlblDefs.length; i++) {
+        relevantGlblDefs[i].def.Value = Value;
+    }
+}
 function subIfCondHandler(data, subData, origElement, subElement, globalDefs, i) {
     var codeJson = esprima.parseScript(origElement.Condition).body[0].expression;
     subElement.Condition = escodegen.generate(substituteExp(codeJson, subData, i, globalDefs));
 }
 
 function substituteExp(json, subData,i ,globalDefs) {
-    return exphandlers[json.type](json, subData,i ,globalDefs);
+    if(json.type =='Literal'){
+        return json;
+    }else{
+        return exphandlers[json.type](json, subData,i ,globalDefs);
+    }
 }
 
 function getGlobalDefs(data, codeString) {
@@ -300,8 +318,10 @@ function identifierHandler(iExp , subData, i, globalDefs) {
 }
 
 function bExspHandler(bExp , subData, i, globalDefs) {
-    bExp.left = exphandlers[bExp.left.type](bExp.left , subData, i, globalDefs);
-    bExp.right = exphandlers[bExp.right.type](bExp.right , subData, i, globalDefs);
+    if(!(bExp.left.type == 'Literal'))
+        bExp.left = exphandlers[bExp.left.type](bExp.left , subData, i, globalDefs);
+    if(!(bExp.right.type == 'Literal'))
+        bExp.right = exphandlers[bExp.right.type](bExp.right , subData, i, globalDefs);
     //bExp.right = exphandlers[bExp.right.type](bExp.right , subData, i, globalDefs);
     return bExp;
 }

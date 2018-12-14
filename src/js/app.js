@@ -19,7 +19,7 @@ $(document).ready(function () {
         data_array.sort(function(a, b){return a['Line']-b['Line'];});
         var globalDefs = getGlobalDefs(data_array, codeToParse);
         var substitutedData = substituteData(globalDefs, data_array);
-        insertData(data_array, table);
+        insertData(substitutedData, table);
         var substitutedCode = substituteCode(codeToParse, substitutedData);
 
     });

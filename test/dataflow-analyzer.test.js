@@ -311,7 +311,44 @@ describe('The data flow analayzer', () => {
     });
 });
 
-/*
+var codeString_13 =
+    `function foo(x, y, z){
+    let a = x + 1;
+    let b = a + y;
+}
+`;
+
+var codeJson_13 = parseCode(codeString_13);
+var data_13 = extractData(codeJson_13);
+var glbl_feds_13 = getGlobalDefs(data_13, codeString_13);
+var data_sub_13 = substituteData(glbl_feds_13,data_13);
+var substituted_val_13 = data_sub_13[5];
+
+describe('The data flow analayzer', () => {
+    it('is substituting properly example 1', () => {
+        assert.equal(substituted_val_13.Value, 'x + 1 + y');
+    });
+});
+
+var codeString_14 =
+    `function foo(x, y, z){
+    let a = x + 1;
+    let b = a + y;
+    b = b + 1;
+}
+`;
+
+var codeJson_14= parseCode(codeString_14);
+var data_14= extractData(codeJson_14);
+var glbl_feds_14= getGlobalDefs(data_14, codeString_14);
+var data_sub_14= substituteData(glbl_feds_14,data_14);
+var updatedGlobalDef_14 = glbl_feds_14[2].def;
+describe('The data flow analayzer', () => {
+    it('is substituting properly example 1', () => {
+        assert.equal(updatedGlobalDef_14.Value, 'x + 1 + y');
+    });
+});
+
 var codeString_m1 =
     `function foo(x, y, z){
     let a = x + 1;
@@ -353,4 +390,3 @@ describe('The data flow analayzer', () => {
     });
 });
 
-*/
