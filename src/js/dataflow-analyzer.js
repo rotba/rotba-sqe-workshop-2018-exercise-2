@@ -1,12 +1,114 @@
-import {extractData, parseCode} from './code-analyzer';
+import * as esprima from 'esprima';
+import * as escodegen from 'escodegen';
 
+var LineTypesEnum = Object.freeze(
+    {
+        'DontTouch':'DontTouch',
+        'while statement':'while statement',
+        'if statement':'if statement',
+        'else if statement':'else if statement',
+        'else statement':'else statement',
+        'assignment expression': 'assignment expression',
+        'return statement': 'return statement'
+    })
+var substitute_handlers = {
+    'return statement' : subRetHandler
+};
 
-function substitute(data, codeString, global_defs){
-    var codeJson = parseCode(codeString);
-    var glbl_feds_m1 = getGlobalDefs(data, codeString);
-    var x = 1;
+var lineHandlers = {
+    //'DontTouch' : dontTouchLineHandler,
+    //'while statement' : whileLineHandler,
+    //'if statement' : ifLineHandler,
+    //'else statement' : elseLineHandler,
+    //'else if statement' : elseIfLineHandler,
+    //'assignment expression': assgnmentLineHandler,
+    'return statement' : retLineHandler
+};
+
+var exphandlers = {
+    BinaryExpression : bExspHandler,
+    //UnaryExpression : uExspHandler,
+    //MemberExpression : mExspHandler,
+    //UpdateExpression : updateExspHandler,
+    //Literal : literalHandler,
+    Identifier : identifierHandler
+};
+
+function test(){
 
 }
+
+function substituteData(global_defs, data){
+    data.sort(function(a, b){return a['Line']-b['Line'];});
+    var ans = data.slice();
+    for (let i = 0; i < ans.length; i++) {
+        var curr_element = data[i];
+        if(curr_element.Type in substitute_handlers){
+            substitute_handlers[curr_element.Type](data, ans, curr_element, ans[i], global_defs, i);
+        }
+    }
+    return ans;
+}
+
+function substituteCode(codeString, substituted_data){
+    var codeArray = codeString.match(/[^\r\n]+/g);
+    var ans = [];
+    for (let i = 0; i < codeArray.length; i++) {
+        var currLine = codeArray[i];
+        var lineNum = i +1;
+        var lineData = substituted_data.filter(element => (element.Line == lineNum));
+        var lineType = getLineType(currLine, lineData);
+        if(lineType in lineHandlers){
+            var newLine = lineHandlers[lineType](currLine, lineNum, lineData);
+            ans.push(newLine);
+        }
+    }
+    return ans;
+}
+
+function getLineType(currLine, lineData) {
+    if(dontTouchLine(lineData)){
+        return LineTypesEnum.DontTouch;
+    }else{
+        return extractLineType(lineData);
+    }
+}
+
+function extractLineType(lineData) {
+    var lineTypes = lineData.map(x => x.Type);
+    var handleTypes = Object.keys(LineTypesEnum).filter(x => x!= 'DontTouch');
+    for (let i = 1; i < handleTypes.length; i++){
+        if(handleTypes[i] in lineTypes){
+            return LineTypesEnum[handleTypes];
+        }
+    }
+    console.log('problem_extractLineType')
+}
+
+function dontTouchLine(lineData) {
+    if(lineData.length == 0){
+        return true;
+    }
+    var types = lineData.map(x => x.Type);
+    var dontTouchTypes = ['function declaration'];
+    for (let i = 0; i < types.length; i++) {
+        var currType = types[i];
+        if(currType in dontTouchTypes){
+            return true;
+        }
+    }
+    return false;
+}
+
+function subRetHandler(data, subData, origElement, subElement, globalDefs, i) {
+    var codeJson = esprima.parseScript(origElement.Value).body[0].expression;
+    subElement.Value = escodegen.generate(substituteExp(codeJson, subData, i, globalDefs));
+}
+
+function substituteExp(json, subData,i ,globalDefs) {
+    return exphandlers[json.type](json, subData,i ,globalDefs);
+}
+
 function getGlobalDefs(data, codeString) {
     var ans = [] ;
     var arrayOfLines = codeString.match(/[^\r\n]+/g);
@@ -155,9 +257,42 @@ function getScopeEnd(loc, codeString){
     }
 }
 
+
+
+function identifierHandler(iExp , subData, i, globalDefs) {
+    var identifier = iExp.name;
+    var globalDef = getGlobalDef(identifier, subData, i ,globalDefs);
+    iExp.name = globalDef.Value;
+    return iExp;
+}
+
+function bExspHandler(bExp , subData, i) {
+
+}
+function getGlobalDef(identifier, subData, index ,globalDefs){
+    for (let i = 0; i < globalDefs.length ; i++){
+        var currGlblDefNode = globalDefs[i].node;
+        var nodeLine = currGlblDefNode.loc.start.line;
+        var elementLine = subData[index].Line;
+        if(currGlblDefNode.id == identifier && elementLine == nodeLine){
+            return globalDefs[i].def;
+        }
+    }
+    console.log('problem_getGlobalDef()');
+}
+
+function retLineHandler(currLine, lineNum, lineData){
+    var ans = '';
+    var idxOfReturnEnd = currLine.lastIndexOf('return');
+    var retString = currLine.substring(0, idxOfReturnEnd);
+    var retValue = lineData.filter(d => d.Type == 'return statement')[0].Value;
+    return ans.concat(retString, ' ', retValue);
+}
 export {getGlobalDefs};
 export {findDCPs};
 export {getDefinitions};
-export {substitute};
+export {substituteData};
+export {substituteCode};
 export {isFeasible};
 export {getUses};
+export {test};

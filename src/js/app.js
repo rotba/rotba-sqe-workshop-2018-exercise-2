@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import {parseCode} from './code-analyzer';
 import {extractData} from './code-analyzer';
-import {substitute} from './dataflow-analyzer';
+import {substituteData} from './dataflow-analyzer';
+import {getGlobalDefs} from './dataflow-analyzer';
 import {storeData} from './model';
 var tableColsEnmt = Object.freeze({'Line':0, 'Type':1, 'Name':2, 'Condition':3, 'Value':4});
 
@@ -15,8 +16,9 @@ $(document).ready(function () {
         storeData(data_array);
         var table = document.getElementById('myTable');
         data_array.sort(function(a, b){return a['Line']-b['Line'];});
-        var substituted = substitute(data_array, codeToParse);
-        insertData(data_array, table);
+        var globalDefs = getGlobalDefs(data_array, codeToParse);
+        var substitutedData = substituteData(globalDefs, data_array);
+        insertData(substitutedData, table);
 
     });
 });

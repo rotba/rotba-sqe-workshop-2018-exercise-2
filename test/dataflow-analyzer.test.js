@@ -6,6 +6,9 @@ import {getDefinitions} from '../src/js/dataflow-analyzer';
 import {getGlobalDefs} from '../src/js/dataflow-analyzer';
 import {getUses} from '../src/js/dataflow-analyzer';
 import {isFeasible} from '../src/js/dataflow-analyzer';
+import {substituteData} from '../src/js/dataflow-analyzer';
+import {substituteCode} from '../src/js/dataflow-analyzer';
+
 
 var codeString_1 = `function foo(x, y, z){
     let a = x + 1;
@@ -131,6 +134,50 @@ describe('The data flow analayzer', () => {
         assert.equal(glbl_feds_5[2].def.Value, ' a  +  5 ');
     });
 });
+
+var codeString_6 = `function foo(x){
+    let a = x + 1;
+    return a;
+}
+`;
+
+
+var codeJson_6 = parseCode(codeString_6);
+var data_6 = extractData(codeJson_6);
+var glbl_feds_6 = getGlobalDefs(data_6, codeString_6);
+var data_sub_6 = substituteData(glbl_feds_6,data_6);
+var substituted_a = data_sub_6[3].Value;
+
+describe('The data flow analayzer', () => {
+    it('is substituting properly', () => {
+        assert.equal(substituted_a, ' x  +  1 ');
+    });
+});
+
+
+
+var codeString_7 = `function foo(x){
+    let a = x + 1;
+    return a;
+}
+`;
+var expected_7 = 'function foo(x){\n' +
+    '    return x + 1;\n' +
+    '}\n';
+
+
+var codeJson_7 = parseCode(codeString_7);
+var data_7 = extractData(codeJson_7);
+var glbl_feds_7 = getGlobalDefs(data_7, codeString_7);
+var data_sub_7 = substituteData(glbl_feds_7,data_7);
+var res_7 = substituteCode(codeString_7, data_sub_7);
+
+describe('The data flow analayzer', () => {
+    it('is substituting properly', () => {
+        assert.equal(res_7, expected_7);
+    });
+});
+
 /*
 var codeString_6 = `function foo(x){
     let a = x + 1;
