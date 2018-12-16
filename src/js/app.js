@@ -16,11 +16,13 @@ $(document).ready(function () {
         let data_array = extractData(parsedCode);
         storeData(data_array);
         var table = document.getElementById('myTable');
+        var subTable = document.getElementById('subCodeTable');
         data_array.sort(function(a, b){return a['Line']-b['Line'];});
         var globalDefs = getGlobalDefs(data_array, codeToParse);
         var substitutedData = substituteData(globalDefs, data_array);
-        insertData(substitutedData, table);
         var substitutedCode = substituteCode(codeToParse, substitutedData);
+        insertData(substitutedData, table);
+        insertSubCode(substitutedCode, subTable, substitutedData);
 
     });
 });
@@ -40,6 +42,17 @@ function insertData(data, table){
         nameCell.innerHTML = data[i]['Name'];
         conditionCell.innerHTML = data[i]['Condition'];
         valueCell.innerHTML = data[i]['Value'];
+    }
+}
+
+//Inserts the data to the html table
+function insertSubCode(subCode, table){
+    var codeArray = subCode.match(/[^\r\n]+/g);
+    for(var i =0; i < codeArray.length; i++){
+        var row = table.insertRow(i+1);
+        var lineCell = row.insertCell(tableColsEnmt.Line);
+        lineCell.innerHTML = codeArray[i];
+        //lineCell.className = 'True';
     }
 }
 //export {attrNamesEnum};

@@ -59,19 +59,29 @@ function substituteData(global_defs, data){
 function substituteCode(codeString, substituted_data){
     var codeArray = codeString.match(/[^\r\n]+/g);
     var ans = [];
+    var newLineNum = 0;
     for (let i = 0; i < codeArray.length; i++) {
         var currLine = codeArray[i];
-        var lineNum = i +1;
+        var lineNum = i + 1;
         var lineData = substituted_data.filter(element => (element.Line == lineNum));
         var lineType = getLineType(currLine, lineData);
         if(lineType == 'DontTouch'){
             ans.push(currLine);
+            newLineNum++;
         }else if(lineType in lineHandlers){
+            updateLineNume(lineData,newLineNum);
             var newLine = lineHandlers[lineType](currLine, lineNum, lineData);
             ans.push(newLine);
+            newLineNum++;
         }
     }
     return ans.join('\n');
+}
+
+function updateLineNume(lineData, newLineNum) {
+    for (let i = 0; i <lineData.length ; i++) {
+        lineData[i].Line = newLineNum;
+    }
 }
 
 function getLineType(currLine, lineData) {
@@ -209,7 +219,7 @@ function isDefinitionUse(use) {
 
 function is_c_use_in_element(id, element){
     var c_use_indicatorr = '';
-    c_use_indicatorr.concat(' ', id, ' ');
+    c_use_indicatorr = c_use_indicatorr.concat(' ', id, ' ');
     var value = element.Value.toString();
     var name = element.Name;
     var c_use_in_value = value !=null&& value.includes(c_use_indicatorr);
@@ -219,7 +229,7 @@ function is_c_use_in_element(id, element){
 
 function is_p_use_in_element(id, element){
     var p_use_indicatorr = '';
-    p_use_indicatorr.concat(' ', id, ' ');
+    p_use_indicatorr = p_use_indicatorr.concat(' ', id, ' ');
     var cond =element.Condition;
     return cond !=null && cond.includes(p_use_indicatorr);
 }
@@ -239,7 +249,7 @@ function isFeasible(loc_1, loc_2, codeString){
     var i = loc_1.start.line-1;
     var j = loc_1.start.column;
     var curr_char;
-    for(i; i < loc_2.start.line;i++) {
+    for(i; i < Math.min(loc_2.start.line,arrayOfLines.length);i++) {
         if(i != loc_1.start.line-1){
             j =0;
         }

@@ -74,6 +74,7 @@ describe('The data flow analayzer', () => {
     });
 });
 
+
 var codeString_3 = `function foo(){
     {let x=0;}
     {x=x+1;}
@@ -140,7 +141,6 @@ var codeString_6 = `function foo(x){
     return a;
 }
 `;
-
 
 var codeJson_6 = parseCode(codeString_6);
 var data_6 = extractData(codeJson_6);
@@ -342,7 +342,7 @@ var codeJson_14= parseCode(codeString_14);
 var data_14= extractData(codeJson_14);
 var glbl_feds_14= getGlobalDefs(data_14, codeString_14);
 var data_sub_14= substituteData(glbl_feds_14,data_14);
-var updatedGlobalDef_14 = glbl_feds_14[2].def;
+var updatedGlobalDef_14 = glbl_feds_14[1].def;
 describe('The data flow analayzer', () => {
     it('is substituting properly example 1', () => {
         assert.equal(updatedGlobalDef_14.Value, 'x + 1 + y');
@@ -378,15 +378,41 @@ var expected_m1 =
     '    }\n' +
     '}\n';
 
+
 var codeJson_m1 = parseCode(codeString_m1);
 var data_m1 = extractData(codeJson_m1);
 var glbl_feds_m1 = getGlobalDefs(data_m1, codeString_m1);
 var data_sub_m1 = substituteData(glbl_feds_m1,data_m1);
 var res_m1 = substituteCode(codeString_m1, data_sub_m1);
-
 describe('The data flow analayzer', () => {
     it('is substituting properly example 1', () => {
         assert.equal(res_m1, expected_m1);
     });
 });
 
+
+var codeString_15 =
+    `let w = 1;
+    function foo(z){
+    let a = w;
+    return a;
+}
+`;
+
+var expected_15 =
+    '`let w = 1;' +
+    'function foo(z){\n' +
+    '    return w;\n' +
+    '}'
+
+var codeJson_15 = parseCode(codeString_15);
+var data_15 = extractData(codeJson_15);
+var glbl_feds_15 = getGlobalDefs(data_15, codeString_15);
+var data_sub_15 = substituteData(glbl_feds_15,data_15);
+var res_15 = substituteCode(codeString_15, data_sub_15);
+
+describe.only('The data flow analayzer', () => {
+    it('is substituting properly while statement', () => {
+        assert.equal(res_12, expected_12);
+    });
+});

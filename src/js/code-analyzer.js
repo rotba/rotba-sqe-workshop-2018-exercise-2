@@ -285,7 +285,7 @@ function literalHandler(exp) {
 
 function identifierHandler(exp) {
     var ans = '';
-    ans = ans.concat(exp.name);
+    ans = ans.concat(' ',exp.name,' ');
     return ans;
 }
 

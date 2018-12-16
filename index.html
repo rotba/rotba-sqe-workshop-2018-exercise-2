@@ -18,6 +18,13 @@
                 width: 80%;
                 height: 95%;
             }
+
+            .True{
+                background-color: green;
+            }
+            .False{
+                background-color: red;
+            }
         </style>
     </head>
     <body>
@@ -39,8 +46,27 @@
                     <div class="textAreaWrapper">
                         <textarea id="codePlaceholder" title="Enter code here"></textarea>
                     </div>
+
+                    <div>
+                        <textarea id="inputVector" title="Enter input vector"></textarea>
+                    </div>
                 </td>
+
                 <td>
+                    <div>
+                        <table id="subCodeTable">
+                            <style>
+                                #myTable, #myTable td{
+                                    border: 1px solid black;
+                                    width: auto;
+                                    height: auto;
+                                }
+                            </style>
+                            <tr >
+                                <td>Line</td>
+                            </tr>
+                        </table>
+                    </div>
                     <div class="textAreaWrapper">
                         <table id="myTable">
                             <style>
