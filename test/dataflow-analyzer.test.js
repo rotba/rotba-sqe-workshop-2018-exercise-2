@@ -125,13 +125,13 @@ var codeString_5 = `function foo(x){
 var codeJson_5 = parseCode(codeString_5);
 var data_5 = extractData(codeJson_5);
 var glbl_feds_5 = getGlobalDefs(data_5, codeString_5);
-
-describe('The data flow analayzer', () => {
+console.log(glbl_feds_5);
+describe.only('The data flow analayzer', () => {
     it('is extracting the global defs properly', () => {
         assert.equal(glbl_feds_5.length, 3);
         assert.equal(glbl_feds_5[0].node.id, 'a');
         assert.equal(glbl_feds_5[2].node.id, 'a');
-        assert.equal(glbl_feds_5[0].def.Value, ' x  +  1 ');
+        assert.equal(glbl_feds_5[0].def.Value, '  x   +  1 ');
         assert.equal(glbl_feds_5[2].def.Value, ' a  +  5 ');
     });
 });
@@ -218,7 +218,7 @@ var glbl_feds_9 = getGlobalDefs(data_9, codeString_9);
 describe('The data flow analayzer', () => {
     it('is finding global defs properly', () => {
         assert.equal(glbl_feds_9[2].node.id, 'a');
-        assert.equal(glbl_feds_9[2].def.Value, ' x  +  1 ');
+        assert.equal(glbl_feds_9[2].def.Value, '  x   +  1 ');
     });
 });
 
@@ -411,7 +411,7 @@ var glbl_feds_15 = getGlobalDefs(data_15, codeString_15);
 var data_sub_15 = substituteData(glbl_feds_15,data_15);
 var res_15 = substituteCode(codeString_15, data_sub_15);
 
-describe.only('The data flow analayzer', () => {
+describe('The data flow analayzer', () => {
     it('is substituting properly while statement', () => {
         assert.equal(res_12, expected_12);
     });

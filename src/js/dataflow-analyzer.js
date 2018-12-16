@@ -162,10 +162,7 @@ function getGlobalDefs(data, codeString) {
 
 function findDCPs(def, data, codeString) {
     var ans = [];
-    var left_most = {
-        start: {line:def.loc.start.line+1, column:def.loc.start.column},
-        end: {line:def.loc.end.line, column:def.loc.end.column}
-    };
+    var left_most = {start: {line:def.loc.start.line+1, column:def.loc.start.column},end: {line:def.loc.end.line, column:def.loc.end.column}};
     while(isFeasible(def.loc, left_most, codeString)){
         var uses = getUses(def.id, left_most.start.line, data);
         uses.sort(function(a, b){return a.loc.start.column-b.loc.start.column;});
