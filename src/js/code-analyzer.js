@@ -298,7 +298,7 @@ function create_new_elem(line, type, name, value, condition, loc){
     return {
         Line : line,
         Type: type_actual,
-        Name: name,
+        Name: name.replace(/ /g, ''),
         Condition: condition,
         Value: value,
         loc: loc

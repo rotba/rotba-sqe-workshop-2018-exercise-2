@@ -83,14 +83,13 @@ for (i = 0; i < data.length; i++) {
         ass_exsp_2 = data[i];
     }
 }
-
 describe('The javascript parser', () => {
     it('is extracting data from an expression statement correctly', () => {
         assert.equal(ass_exsp['Line'],3);
         assert.equal(ass_exsp['Type'],'assignment expression');
         assert.equal(ass_exsp['Name'],'low');
         assert.equal(ass_exsp['Value'],0);
-        assert.equal(ass_exsp_2['Value'],' n  -  1 ');
+        assert.equal(ass_exsp_2['Value'],'  n   -  1 ');
     });
 });
 
@@ -114,7 +113,7 @@ describe('The javascript parser', () => {
         assert.equal(while_exsp['Line'],5);
         assert.equal(while_exsp['Type'],'while statement');
         assert.equal(while_exsp['Name'],'');
-        assert.equal(while_exsp['Condition'],' low  <=  high ');
+        assert.equal(while_exsp['Condition'],'  low   <=   high  ');
         assert.equal(while_exsp['Value'],'');
     });
 });
@@ -142,7 +141,7 @@ describe('The javascript parser', () => {
         assert.equal(if_stat['Line'],7);
         assert.equal(if_stat['Type'],'if statement');
         assert.equal(if_stat['Name'],'');
-        assert.equal(if_stat['Condition'],' X  <  V[ mid ] ');
+        assert.equal(if_stat['Condition'],'  X   <   V [  mid  ] ');
         assert.equal(if_stat['Value'],'');
     });
 });
@@ -172,7 +171,7 @@ describe('The javascript parser', () => {
         assert.equal(else_if_stat['Line'],9);
         assert.equal(else_if_stat['Type'],'else if statement');
         assert.equal(else_if_stat['Name'],'');
-        assert.equal(else_if_stat['Condition'],' X  >  V[ mid ] ');
+        assert.equal(else_if_stat['Condition'],'  X   >   V [  mid  ] ');
         assert.equal(else_if_stat['Value'],'');
     });
 });
@@ -267,7 +266,7 @@ for (i = 0; i < data.length; i++) {
 
 describe('The javascript parser', () => {
     it('is extracting data from a complicated expression correctly', () => {
-        assert.equal(comp_exsp['Value'],'(  low  +  high  ) /  2 ');
+        assert.equal(comp_exsp['Value'],'(   low   +   high   ) /  2 ');
     });
 });
 
@@ -298,7 +297,7 @@ describe('The javascript parser', () => {
         assert.equal(if_with_block_stat['Line'],7);
         assert.equal(if_with_block_stat['Type'],'if statement');
         assert.equal(if_with_block_stat['Name'],'');
-        assert.equal(if_with_block_stat['Condition'],' X  <  V[ mid ] ');
+        assert.equal(if_with_block_stat['Condition'],'  X   <   V [  mid  ] ');
         assert.equal(if_with_block_stat['Value'],'');
     });
 });
@@ -327,7 +326,7 @@ for (i = 0; i < data.length; i++) {
 
 describe('The javascript parser', () => {
     it('is extracting data from a complicated expression correctly', () => {
-        assert.equal(comp_exp_2['Value'],'(  low  +  high  ) / (  2  +  3  )');
+        assert.equal(comp_exp_2['Value'],'(   low   +   high   ) / (  2  +  3  )');
     });
 });
 
@@ -348,7 +347,7 @@ describe('The javascript parser', () => {
         assert.equal(for_exp['Line'],1);
         assert.equal(for_exp['Type'],'for statement');
         assert.equal(for_exp['Name'],'');
-        assert.equal(for_exp['Condition'],' i  <  length ');
+        assert.equal(for_exp['Condition'],'  i   <   length  ');
         assert.equal(for_exp['Value'],'');
     });
 });

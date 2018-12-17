@@ -38,7 +38,7 @@ describe('The data flow analayzer', () => {
         assert.equal(def_1[0].id, 'c');
         assert.equal(def_1[0].loc.start.line, 7);
         assert.equal(def_1[0].loc.start.column, 8);
-        assert.equal(def_1[0].Value, ' c  +  5 ');
+        assert.equal(def_1[0].Value, '  c   +  5 ');
     });
 });
 
@@ -48,7 +48,7 @@ describe('The data flow analayzer', () => {
     });
     it('is getting the definition use right', () => {
         assert.equal(uses_1[0].id, 'c');
-        assert.equal(uses_1[0].Value, '(  c  +  x  ) +  5 ' );
+        assert.equal(uses_1[0].Value, '(   c   +   x   ) +  5 ' );
     });
     it('is getting the c_use right', () => {
         assert.equal(uses_1[1].id, 'c');
@@ -125,14 +125,13 @@ var codeString_5 = `function foo(x){
 var codeJson_5 = parseCode(codeString_5);
 var data_5 = extractData(codeJson_5);
 var glbl_feds_5 = getGlobalDefs(data_5, codeString_5);
-console.log(glbl_feds_5);
-describe.only('The data flow analayzer', () => {
+describe('The data flow analayzer', () => {
     it('is extracting the global defs properly', () => {
         assert.equal(glbl_feds_5.length, 3);
         assert.equal(glbl_feds_5[0].node.id, 'a');
         assert.equal(glbl_feds_5[2].node.id, 'a');
         assert.equal(glbl_feds_5[0].def.Value, '  x   +  1 ');
-        assert.equal(glbl_feds_5[2].def.Value, ' a  +  5 ');
+        assert.equal(glbl_feds_5[2].def.Value, '  a   +  5 ');
     });
 });
 

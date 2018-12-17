@@ -59,7 +59,7 @@ function substituteData(global_defs, data){
 function substituteCode(codeString, substituted_data){
     var codeArray = codeString.match(/[^\r\n]+/g);
     var ans = [];
-    var newLineNum = 0;
+    var newLineNum = 1;
     for (let i = 0; i < codeArray.length; i++) {
         var currLine = codeArray[i];
         var lineNum = i + 1;
@@ -168,6 +168,7 @@ function findDCPs(def, data, codeString) {
         uses.sort(function(a, b){return a.loc.start.column-b.loc.start.column;});
         for (var i = 0; i < uses.length; i++) {
             if(uses[i].Value ==null){
+                uses[i].id = uses[i].id.replace(/ /g, '');
                 ans.push({def:def, node:uses[i]});
             }
             if(isDefinitionUse(uses[i])){
@@ -193,7 +194,7 @@ function getUses(id , line, data) {
     var line_elements =  data.filter(element => (element.Line == line));
     for (var i = 0; i < line_elements.length; i++) {
         var element =line_elements[i];
-        if(isDefinition(element) && element.Name == id){
+        if(isDefinition(element) && element.Name.replace(/ /g,'') == id.replace(/ /g,'')){
             ans.push(createUse(id, element.loc, element.Value));
         }
         if(is_c_use_in_element(id, element) || is_p_use_in_element(id, element)){
@@ -216,7 +217,7 @@ function isDefinitionUse(use) {
 
 function is_c_use_in_element(id, element){
     var c_use_indicatorr = '';
-    c_use_indicatorr = c_use_indicatorr.concat(' ', id, ' ');
+    c_use_indicatorr = c_use_indicatorr.concat(' ', id, ' ').replace('  ', ' ').replace('  ',' ');
     var value = element.Value.toString();
     var name = element.Name;
     var c_use_in_value = value !=null&& value.includes(c_use_indicatorr);
@@ -233,7 +234,7 @@ function is_p_use_in_element(id, element){
 
 function createUse(id, loc, value){
     return {
-        id:id,
+        id:id.replace(/ /g, ''),
         loc:loc,
         Value: value
     };
