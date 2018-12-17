@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import {parseCode} from './code-analyzer';
 import {extractData} from './code-analyzer';
-import {findDCPs, substituteData} from './dataflow-analyzer';
+import {substituteData} from './dataflow-analyzer';
 import {substituteCode} from './dataflow-analyzer';
 import {getGlobalDefs} from './dataflow-analyzer';
 import {storeData} from './model';
@@ -15,13 +15,13 @@ $(document).ready(function () {
         let parsedCode = parseCode(codeToParse);
         let data_array = extractData(parsedCode);
         storeData(data_array);
-        var table = document.getElementById('myTable');
+        //var table = document.getElementById('myTable');
         var subTable = document.getElementById('subCodeTable');
         data_array.sort(function(a, b){return a['Line']-b['Line'];});
         var globalDefs = getGlobalDefs(data_array, codeToParse);
         var substitutedData = substituteData(globalDefs, data_array);
         var substitutedCode = substituteCode(codeToParse, substitutedData);
-        insertData(substitutedData, table);
+        //insertData(substitutedData, table);
         insertSubCode(substitutedCode, subTable, substitutedData, $('#inputVector').val());
 
     });
@@ -52,7 +52,7 @@ function insertSubCode(subCode, table, substitutedData, inputFromUser){
     var codeArray = subCode.match(/[^\r\n]+/g);
     for(var i =0; i < codeArray.length; i++){
         var row = table.insertRow(i+1);
-        var lineCell = row.insertCell(tableColsEnmt.Line);
+        var lineCell = row.insertCell(tableColsEnmt[' ']);
         lineCell.innerHTML = codeArray[i];
         paintRaw(lineCell,substitutedData,inputVector, i+1);
     }

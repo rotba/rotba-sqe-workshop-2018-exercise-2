@@ -28,6 +28,7 @@ var lineHandlers = {
     //'else statement' : elseLineHandler,
     'else if statement' : elseIfLineHandler,
     //'assignment expression': assgnmentLineHandler,
+    //'variable declaration': assgnmentLineHandler,
     'return statement' : retLineHandler
 };
 
@@ -56,25 +57,25 @@ function substituteData(global_defs, data){
 function substituteCode(codeString, substituted_data){
     var codeArray = codeString.match(/[^\r\n]+/g);
     var ans = [];
-    var newLineNum = 1;
+    var newLineNumSingelArray = [1];
     for (let i = 0; i < codeArray.length; i++) {
         var currLine = codeArray[i];
         var lineNum = i + 1;
         var lineData = substituted_data.filter(element => (element.Line == lineNum));
         var lineType = getLineType(currLine, lineData);
         if(lineType == 'DontTouch'){
-            ans.push(currLine);newLineNum++;
+            ans.push(currLine);
+            newLineNumSingelArray[0]++;
         }else if(lineType in lineHandlers){
-            updateLineNume(lineData,newLineNum);
-            var newLine = lineHandlers[lineType](currLine, lineNum, lineData);
-            ans.push(newLine);
-            newLineNum++;
+            //updateLineNume(lineData,newLineNum);
+            ans.push.apply(ans ,lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray));
+            //ans.push(lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray));
         }
     }
     return ans.join('\n');
 }
 
-function updateLineNume(lineData, newLineNum) {
+function updateLineNum(lineData, newLineNum) {
     for (let i = 0; i <lineData.length ; i++) {
         lineData[i].Line = newLineNum;
     }
@@ -345,19 +346,24 @@ function getGlobalDef(identifier, subData, index ,globalDefs){
     }
 }
 
-function retLineHandler(currLine, lineNum, lineData){
-    var ans = '';
+function retLineHandler(currLine, lineNum, lineData, lineNumberArray){
+    var ans = [];
+    var strAns = '';
     var idxOfReturnEnd = currLine.indexOf('return')+'return'.length;
     var retString = currLine.substring(0, idxOfReturnEnd);
     var retValue = lineData.filter(d => d.Type == 'return statement')[0].Value;
     while(retValue.includes('  ')){
         retValue = retValue.replace('  ', ' ' );
     }
-    return ans.concat(retString, ' ', retValue, ';');
+    ans.push(strAns.concat(retString, ' ', retValue, ';'));
+    updateLineNum(lineData,lineNumberArray[0]);
+    lineNumberArray[0] +=1;
+    return ans;
 }
 
-function ifLineHandler(currLine, lineNum, lineData){
-    var ans = '';
+function ifLineHandler(currLine, lineNum, lineData, lineNumberArray){
+    var ans = [];
+    var strAns = '';
     currLine = currLine.replace('if (', 'if(' );
     var idxOfIfEnd = currLine.indexOf('if(')+'if('.length;
     var ifSrtStart = currLine.substring(0, idxOfIfEnd);
@@ -366,11 +372,15 @@ function ifLineHandler(currLine, lineNum, lineData){
     while(ifCond.includes('  ')){
         ifCond = ifCond.replace('  ', ' ' );
     }
-    return ans.concat(ifSrtStart,  ifCond, ifSrtEnd);
+    ans.push(strAns.concat(ifSrtStart,  ifCond, ifSrtEnd));
+    updateLineNum(lineData,lineNumberArray[0]);
+    lineNumberArray[0] +=1;
+    return ans;
 }
 
-function elseIfLineHandler(currLine, lineNum, lineData){
-    var ans = '';
+function elseIfLineHandler(currLine, lineNum, lineData,lineNumberArray){
+    var ans = [];
+    var strAns = '';
     var ifElseStr = 'else if(';
     currLine =adaptIfElse(currLine, ifElseStr);
     var idxOfIfEnd = currLine.indexOf(ifElseStr)+ifElseStr.length;
@@ -380,11 +390,15 @@ function elseIfLineHandler(currLine, lineNum, lineData){
     while(ifCond.includes('  ')){
         ifCond = ifCond.replace('  ', ' ' );
     }
-    return ans.concat(ifSrtStart,  ifCond, ifSrtEnd);
+    ans.push(strAns.concat(ifSrtStart,  ifCond, ifSrtEnd));
+    updateLineNum(lineData,lineNumberArray[0]);
+    lineNumberArray[0] +=1;
+    return ans;
 }
 
-function whileLineHandler(currLine, lineNum, lineData){
-    var ans = '';
+function whileLineHandler(currLine, lineNum, lineData, lineNumberArray){
+    var ans = [];
+    var strAns = '';
     currLine = currLine.replace('while (', 'while(' );
     var idxOfWhileEnd = currLine.indexOf('while(')+'while('.length;
     var whileSrtStart = currLine.substring(0, idxOfWhileEnd);
@@ -393,7 +407,10 @@ function whileLineHandler(currLine, lineNum, lineData){
     while(ifCond.includes('  ')){
         ifCond = ifCond.replace('  ', ' ' );
     }
-    return ans.concat(whileSrtStart,  ifCond, whileSrtEnd);
+    ans.push(strAns.concat(whileSrtStart,  ifCond, whileSrtEnd))
+    updateLineNum(lineData,lineNumberArray[0]);
+    lineNumberArray[0] +=1;
+    return ans;
 }
 
 function adaptIfElse(currLine, ifElseStr) {
