@@ -348,46 +348,46 @@ describe('The data flow analayzer', () => {
     });
 });
 
-var codeString_m1 =
-    `function foo(x, y, z){
-    let a = x + 1;
-    let b = a + y;
-    let c = 0;
-    
-    if (b < z) {
-        c = c + 5;
-        return x + y + z + c;
-    } else if (b < z * 2) {
-        c = c + x + 5;
-        return x + y + z + c;
-    } else {
-        c = c + z + 5;
-        return x + y + z + c;
-    }
-}
-`;
-var expected_m1 =
-    'function foo(x, y, z){\n' +
-    '    if (x + 1 + y < z) {\n' +
-    '        return x + y + z + 5;\n' +
-    '    } else if (x + 1 + y < z * 2) {\n' +
-    '        return x + y + z + x + 5;\n' +
-    '    } else {\n' +
-    '        return x + y + z + z + 5;\n' +
-    '    }\n' +
-    '}\n';
-
-
-var codeJson_m1 = parseCode(codeString_m1);
-var data_m1 = extractData(codeJson_m1);
-var glbl_feds_m1 = getGlobalDefs(data_m1, codeString_m1);
-var data_sub_m1 = substituteData(glbl_feds_m1,data_m1);
-var res_m1 = substituteCode(codeString_m1, data_sub_m1);
-describe('The data flow analayzer', () => {
-    it('is substituting properly example 1', () => {
-        assert.equal(res_m1, expected_m1);
-    });
-});
+// var codeString_m1 =
+//     `function foo(x, y, z){
+//     let a = x + 1;
+//     let b = a + y;
+//     let c = 0;
+//
+//     if (b < z) {
+//         c = c + 5;
+//         return x + y + z + c;
+//     } else if (b < z * 2) {
+//         c = c + x + 5;
+//         return x + y + z + c;
+//     } else {
+//         c = c + z + 5;
+//         return x + y + z + c;
+//     }
+// }
+// `;
+// var expected_m1 =
+//     'function foo(x, y, z){\n' +
+//     '    if (x + 1 + y < z) {\n' +
+//     '        return x + y + z + 5;\n' +
+//     '    } else if (x + 1 + y < z * 2) {\n' +
+//     '        return x + y + z + x + 5;\n' +
+//     '    } else {\n' +
+//     '        return x + y + z + z + 5;\n' +
+//     '    }\n' +
+//     '}\n';
+//
+//
+// var codeJson_m1 = parseCode(codeString_m1);
+// var data_m1 = extractData(codeJson_m1);
+// var glbl_feds_m1 = getGlobalDefs(data_m1, codeString_m1);
+// var data_sub_m1 = substituteData(glbl_feds_m1,data_m1);
+// var res_m1 = substituteCode(codeString_m1, data_sub_m1);
+// describe('The data flow analayzer', () => {
+//     it('is substituting properly example 1', () => {
+//         assert.equal(res_m1, expected_m1);
+//     });
+// });
 
 
 var codeString_15 =
