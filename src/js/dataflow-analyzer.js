@@ -12,7 +12,7 @@ var LineTypesEnum = Object.freeze(
         'variable declaration': 'variable declaration',
         'return statement': 'return statement',
         'unknown': 'unknown'
-    })
+    });
 var substitute_handlers = {
     'return statement' : subRetHandler,
     'if statement' : subIfCondHandler,
@@ -40,9 +40,6 @@ var exphandlers = {
     Identifier : identifierHandler
 };
 
-function test(){
-
-}
 
 function substituteData(global_defs, data){
     data.sort(function(a, b){return a['Line']-b['Line'];});
@@ -66,8 +63,7 @@ function substituteCode(codeString, substituted_data){
         var lineData = substituted_data.filter(element => (element.Line == lineNum));
         var lineType = getLineType(currLine, lineData);
         if(lineType == 'DontTouch'){
-            ans.push(currLine);
-            newLineNum++;
+            ans.push(currLine);newLineNum++;
         }else if(lineType in lineHandlers){
             updateLineNume(lineData,newLineNum);
             var newLine = lineHandlers[lineType](currLine, lineNum, lineData);
@@ -197,12 +193,15 @@ function getUses(id , line, data) {
         if(isDefinition(element) && element.Name.replace(/ /g,'') == id.replace(/ /g,'')){
             ans.push(createUse(id, element.loc, element.Value));
         }
-        if(is_c_use_in_element(id, element) || is_p_use_in_element(id, element)){
+        if(is_c_use_or_p_use(id, element)){
             ans.push(createUse(id, element.loc, null));
         }
     }
     return ans;
+}
 
+function is_c_use_or_p_use(id, element) {
+    return is_c_use_in_element(id, element) || is_p_use_in_element(id, element);
 }
 
 function isDefinition(element) {
@@ -246,26 +245,26 @@ function isFeasible(loc_1, loc_2, codeString){
     var stack = [];
     var i = loc_1.start.line-1;
     var j = loc_1.start.column;
-    var curr_char;
     for(i; i < Math.min(loc_2.start.line,arrayOfLines.length);i++) {
-        if(i != loc_1.start.line-1){
-            j =0;
-        }
         for(j; j < arrayOfLines[i].length;j++){
-            if(reachedLoc(i +1, j, loc_2, arrayOfLines[i])){
-                return true;
-            }
-            curr_char = arrayOfLines[i][j];
-            if(curr_char == '{'){
-                stack.push('{');
-            }else if(curr_char == '}'){
-                if(stack.length ==0){
-                    return false;
-                }
-                stack.pop();
-            }
+            if(reachedLoc(i +1, j, loc_2, arrayOfLines[i])) return true;
+            var curr_char = arrayOfLines[i][j];
+            if(!isEquivalentlBrackets(stack, curr_char)) return false;
         }
+        j =0;
     }
+}
+
+function isEquivalentlBrackets(stack, curr_char) {
+    if(curr_char == '{'){
+        stack.push('{');
+    }else if(curr_char == '}'){
+        if(stack.length ==0){
+            return false;
+        }
+        stack.pop();
+    }
+    return true;
 }
 
 function reachedLoc(i, j, loc_2, line) {
@@ -410,4 +409,3 @@ export {substituteData};
 export {substituteCode};
 export {isFeasible};
 export {getUses};
-export {test};
