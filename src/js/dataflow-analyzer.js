@@ -109,16 +109,35 @@ function getAfterFuncFlobals(substitutedData) {
 }
 
 function getParamsValues(substitutedData, inputFromUser) {
-    var ans = []
-    if (/^\w+(,\w+)*$/.test(inputFromUser)) {
-        var values = inputFromUser.split(',');
-        var currValIndex = 0;
-        for (let i = 0; i <substitutedData.length ; i++) {
-            var currElement = substitutedData[i];
-            if(currElement.Type == 'Param'){
-                currElement.Value = values[currValIndex++];
-                ans.push(currElement);
+    var ans = [];
+    //if (/^\w+(,\w+)*$/.test(inputFromUser)) {
+    var values = inputFromUser.split(',');
+    values = orderInputValues(values);
+    var currValIndex = 0;
+    for (let i = 0; i <substitutedData.length ; i++) {
+        var currElement = substitutedData[i];
+        if(currElement.Type == 'Param'){
+            currElement.Value = values[currValIndex++];
+            ans.push(currElement);
+        }
+    }
+    return ans;
+}
+
+function orderInputValues(values) {
+    var i = 0;
+    var ans = [];
+    while(i < values.length){
+        var goodValue = '';
+        if(values[i].includes('[') && !values[i].includes(']')){
+            goodValue = values[i++];
+            while(!values[i].includes(']')){
+                goodValue = goodValue.concat(', ', values[i++]);
             }
+            goodValue = goodValue.concat(', ', values[i++]);
+            ans.push(goodValue);
+        }else{
+            ans.push(values[i++]);
         }
     }
     return ans;
@@ -393,6 +412,10 @@ function arrHandler(arrExp , subData, i, globalDefs) {
 function mExspHandler(mExp , subData, i, globalDefs) {
     if(!(mExp.property.type == 'Literal'))
         mExp.property = exphandlers[mExp.property.type](mExp.property , subData, i, globalDefs);
+    if(!isLocal(mExp.object.name, subData, i)){
+        updateArrayInputVector(mExp , subData, i, globalDefs);
+        return mExp;
+    }
     var array  = getEsprimaArray(mExp , subData, i, globalDefs);
     if(array[mExp.property.value].type == 'Literal')
         mExp = array[mExp.property.value];
@@ -471,6 +494,7 @@ function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, input
     var ans = [];
     var assExp = lineData.filter(d => d.Type == 'assignment expression')[0];
     if(!inInputVector(assExp, inputVector)){
+        //handleArrayValueUpdate()
         return ans;
     }
     var strAns = '';

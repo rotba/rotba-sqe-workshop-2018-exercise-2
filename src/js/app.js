@@ -75,7 +75,7 @@ function evaluate(cond, inputVector) {
     for (let i = 0; i <inputVector.length ; i++) {
         var currElemnt = inputVector[i];
         var var_string = currElemnt.Name;
-        let regex = new RegExp('[^\\d\\w]|' + var_string.replace('[', '\\[').replace(']', '\\]') + '|[^\\d\\w]', 'g')
+        let regex = new RegExp('([^\\d\\w]|\\b)' + var_string.replace('[', '\\[').replace(']', '\\]')  + '([^\\d\\w]|\\b)', 'g');
         cond = cond.replace(regex, function (x) {
             return x.replace(var_string, currElemnt.Value);
         });

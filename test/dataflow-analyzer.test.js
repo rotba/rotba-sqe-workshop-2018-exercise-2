@@ -483,7 +483,7 @@ var codeString_18 =
 
 var expected_18 =
     'function foo(x, y, z){\n' +
-    '    if(5 < z) {\n' +
+    '    if(1 < z) {\n' +
     '        return 5;\n' +
     '    }\n' +
     '}';
@@ -493,7 +493,7 @@ var data_18 = extractData(codeJson_18);
 var glbl_feds_18 = getGlobalDefs(data_18, codeString_18);
 var data_sub_18 = substituteData(glbl_feds_18,data_18);
 var res_18 = substituteCode(codeString_18, data_sub_18, getInputVector(data_sub_18, '[1]'));
-describe('The data flow analayzer', () => {
+describe.only('The data flow analayzer', () => {
     it('is substituting properly while statement', () => {
         assert.equal(res_18, expected_18);
     });
