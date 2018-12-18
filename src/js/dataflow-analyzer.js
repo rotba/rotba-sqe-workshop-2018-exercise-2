@@ -35,10 +35,11 @@ var lineHandlers = {
 var exphandlers = {
     BinaryExpression : bExspHandler,
     //UnaryExpression : uExspHandler,
-    //MemberExpression : mExspHandler,
+    MemberExpression : mExspHandler,
     //UpdateExpression : updateExspHandler,
     //Literal : literalHandler,
-    Identifier : identifierHandler
+    Identifier : identifierHandler,
+    ArrayExpression : arrHandler
 };
 
 
@@ -381,7 +382,29 @@ function bExspHandler(bExp , subData, i, globalDefs) {
     //bExp.right = exphandlers[bExp.right.type](bExp.right , subData, i, globalDefs);
     return bExp;
 }
+function arrHandler(arrExp , subData, i, globalDefs) {
+    for (let j = 0; j < arrExp.elements.length; j++) {
+        if(!(arrExp.elements[j].type == 'Literal'))
+            arrExp.elements[j] = exphandlers[arrExp.elements[j].type](arrExp.elements[j] , subData, i, globalDefs);
+    }
+    return arrExp;
+}
 
+function mExspHandler(mExp , subData, i, globalDefs) {
+    if(!(mExp.property.type == 'Literal'))
+        mExp.property = exphandlers[mExp.property.type](mExp.property , subData, i, globalDefs);
+    var array  = getEsprimaArray(mExp , subData, i, globalDefs);
+    if(array[mExp.property.value].type == 'Literal')
+        mExp = array[mExp.property.value];
+    else
+        mExp = exphandlers[array[mExp.property.value].type](array[mExp.property.value] , subData, i, globalDefs);
+    return mExp;
+}
+
+function getEsprimaArray(mExp, subData, i, globalDefs) {
+    var globalDef = getGlobalDef(mExp.object.name, subData, i ,globalDefs);
+    return esprima.parseScript(globalDef.Value).body[0].expression.elements;
+}
 
 function getGlobalDef(identifier, subData, index ,globalDefs){
     for (let i = 0; i < globalDefs.length ; i++){

@@ -19,7 +19,8 @@ var exphandlers = {
     MemberExpression : mExspHandler,
     UpdateExpression : updateExspHandler,
     Literal : literalHandler,
-    Identifier : identifierHandler
+    Identifier : identifierHandler,
+    ArrayExpression : arrExpHandler
 };
 
 var dict_type_type_name = {
@@ -287,6 +288,17 @@ function identifierHandler(exp) {
     var ans = '';
     ans = ans.concat(' ',exp.name,' ');
     return ans;
+}
+
+function arrExpHandler(exp) {
+    var ans = '[';
+    for (let i = 0; i < exp.elements.length; i++) {
+        ans = ans.concat(' ', handleExp(exp.elements[i]), ' ');
+        if(!(i == exp.elements.length -1)){
+            ans =ans.concat(' , ');
+        }
+    }
+    return ans.concat(']');
 }
 
 //Function that creates an element given it's neccesary details
