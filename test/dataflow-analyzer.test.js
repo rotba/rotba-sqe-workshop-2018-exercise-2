@@ -8,6 +8,7 @@ import {getUses} from '../src/js/dataflow-analyzer';
 import {isFeasible} from '../src/js/dataflow-analyzer';
 import {substituteData} from '../src/js/dataflow-analyzer';
 import {substituteCode} from '../src/js/dataflow-analyzer';
+import {getInputVector} from '../src/js/dataflow-analyzer';
 
 
 var codeString_1 = `function foo(x, y, z){
@@ -168,7 +169,8 @@ var codeJson_7 = parseCode(codeString_7);
 var data_7 = extractData(codeJson_7);
 var glbl_feds_7 = getGlobalDefs(data_7, codeString_7);
 var data_sub_7 = substituteData(glbl_feds_7,data_7);
-var res_7 = substituteCode(codeString_7, data_sub_7);
+var res_7 = substituteCode(codeString_7, data_sub_7, getInputVector(data_sub_7, '1'));
+
 
 describe('The data flow analayzer', () => {
     it('is substituting properly', () => {
@@ -193,7 +195,7 @@ var codeJson_8 = parseCode(codeString_8);
 var data_8 = extractData(codeJson_8);
 var glbl_feds_8 = getGlobalDefs(data_8, codeString_8);
 var data_sub_8 = substituteData(glbl_feds_8,data_8);
-var res_8 = substituteCode(codeString_8, data_sub_8);
+var res_8 = substituteCode(codeString_8, data_sub_8, getInputVector(data_sub_8, '1'));
 
 describe('The data flow analayzer', () => {
     it('is substituting properly', () => {
@@ -243,7 +245,7 @@ var codeJson_10 = parseCode(codeString_10);
 var data_10 = extractData(codeJson_10);
 var glbl_feds_10 = getGlobalDefs(data_10, codeString_10);
 var data_sub_10 = substituteData(glbl_feds_10,data_10);
-var res_10 = substituteCode(codeString_10, data_sub_10);
+var res_10 = substituteCode(codeString_10, data_sub_10,  getInputVector(data_sub_10, '1'));
 
 describe('The data flow analayzer', () => {
     it('is substituting properly', () => {
@@ -273,7 +275,7 @@ var codeJson_11 = parseCode(codeString_11);
 var data_11 = extractData(codeJson_11);
 var glbl_feds_11 = getGlobalDefs(data_11, codeString_11);
 var data_sub_11 = substituteData(glbl_feds_11,data_11);
-var res_11 = substituteCode(codeString_11, data_sub_11);
+var res_11 = substituteCode(codeString_11, data_sub_11,  getInputVector(data_sub_11, '1'));
 
 describe('The data flow analayzer', () => {
     it('is substituting properly', () => {
@@ -302,7 +304,7 @@ var codeJson_12 = parseCode(codeString_12);
 var data_12 = extractData(codeJson_12);
 var glbl_feds_12 = getGlobalDefs(data_12, codeString_12);
 var data_sub_12 = substituteData(glbl_feds_12,data_12);
-var res_12 = substituteCode(codeString_12, data_sub_12);
+var res_12 = substituteCode(codeString_12, data_sub_12,  getInputVector(data_sub_12, '1'));
 
 describe('The data flow analayzer', () => {
     it('is substituting properly while statement', () => {
@@ -399,8 +401,8 @@ var codeString_15 =
 `;
 
 var expected_15 =
-    '`let w = 1;' +
-    'function foo(z){\n' +
+    'let w = 1;\n' +
+    '    function foo(z){\n' +
     '    return w;\n' +
     '}'
 
@@ -408,10 +410,62 @@ var codeJson_15 = parseCode(codeString_15);
 var data_15 = extractData(codeJson_15);
 var glbl_feds_15 = getGlobalDefs(data_15, codeString_15);
 var data_sub_15 = substituteData(glbl_feds_15,data_15);
-var res_15 = substituteCode(codeString_15, data_sub_15);
+var res_15 = substituteCode(codeString_15, data_sub_15, getInputVector(data_sub_15, '1'));
 
 describe('The data flow analayzer', () => {
     it('is substituting properly while statement', () => {
-        assert.equal(res_12, expected_12);
+        assert.equal(res_15, expected_15);
+    });
+});
+
+var codeString_16 =
+    `function foo(w){
+    let a = w;
+    w = a +1;
+    return a;
+}
+`;
+
+var expected_16 =
+    'function foo(w){\n' +
+    'w = w + 1;\n' +
+    '    return w;\n' +
+    '}'
+
+var codeJson_16 = parseCode(codeString_16);
+var data_16 = extractData(codeJson_16);
+var glbl_feds_16 = getGlobalDefs(data_16, codeString_16);
+var data_sub_16 = substituteData(glbl_feds_16,data_16);
+var res_16 = substituteCode(codeString_16, data_sub_16, getInputVector(data_sub_16, '1'));
+describe('The data flow analayzer', () => {
+    it('is substituting properly while statement', () => {
+        assert.equal(res_16, expected_16);
+    });
+});
+
+var codeString_17 =
+    `function foo(w){
+    let a = w;
+    w = a +1;
+    return a;
+}
+let z = 1;
+`;
+
+var expected_17 =
+    'function foo(w){\n' +
+    'w = w + 1;\n' +
+    '    return w;\n' +
+    '}\n'+
+    'let z = 1;';
+
+var codeJson_17 = parseCode(codeString_17);
+var data_17 = extractData(codeJson_17);
+var glbl_feds_17 = getGlobalDefs(data_17, codeString_17);
+var data_sub_17 = substituteData(glbl_feds_17,data_17);
+var res_17 = substituteCode(codeString_17, data_sub_17, getInputVector(data_sub_17, '1'));
+describe('The data flow analayzer', () => {
+    it('is substituting properly while statement', () => {
+        assert.equal(res_17, expected_17);
     });
 });

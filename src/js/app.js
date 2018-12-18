@@ -4,6 +4,7 @@ import {extractData} from './code-analyzer';
 import {substituteData} from './dataflow-analyzer';
 import {substituteCode} from './dataflow-analyzer';
 import {getGlobalDefs} from './dataflow-analyzer';
+import {getInputVector} from './dataflow-analyzer';
 import {storeData} from './model';
 var tableColsEnmt = Object.freeze({'Line':0, 'Type':1, 'Name':2, 'Condition':3, 'Value':4});
 
@@ -20,7 +21,7 @@ $(document).ready(function () {
         data_array.sort(function(a, b){return a['Line']-b['Line'];});
         var globalDefs = getGlobalDefs(data_array, codeToParse);
         var substitutedData = substituteData(globalDefs, data_array);
-        var substitutedCode = substituteCode(codeToParse, substitutedData);
+        var substitutedCode = substituteCode(codeToParse, substitutedData, getInputVector(substitutedData, $('#inputVector').val()));
         //insertData(substitutedData, table);
         insertSubCode(substitutedCode, subTable, substitutedData, $('#inputVector').val());
 
@@ -90,42 +91,6 @@ function getElementToPaint(substitutedData, lineNum) {
     }else{
         return relevantElements[0];
     }
-}
-
-function getInputVector(substitutedData, inputFromUser) {
-    var ans  = [];
-    ans.push.apply(ans ,getGlobals(substitutedData));
-    ans.push.apply(ans ,getParamsValues(substitutedData, inputFromUser));
-    return ans;
-}
-
-function getGlobals(substitutedData) {
-    var ans = [];
-    for (let i = 0; i <substitutedData.length ; i++){
-        var curr_element = substitutedData[i];
-        if(curr_element.Type == 'function declaration'){
-            return ans;
-        }else if(curr_element.Type =='variable declaration'){
-            ans.push(curr_element);
-        }
-    }
-    return ans;
-}
-
-function getParamsValues(substitutedData, inputFromUser) {
-    var ans = []
-    if (/^\w+(,\w+)*$/.test(inputFromUser)) {
-        var values = inputFromUser.split(',');
-        var currValIndex = 0;
-        for (let i = 0; i <substitutedData.length ; i++) {
-            var currElement = substitutedData[i];
-            if(currElement.Type == 'Param'){
-                currElement.Value = values[currValIndex++];
-                ans.push(currElement);
-            }
-        }
-    }
-    return ans;
 }
 //export {attrNamesEnum};
 

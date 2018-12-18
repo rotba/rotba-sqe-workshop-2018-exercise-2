@@ -27,8 +27,8 @@ var lineHandlers = {
     'if statement' : ifLineHandler,
     //'else statement' : elseLineHandler,
     'else if statement' : elseIfLineHandler,
-    //'assignment expression': assgnmentLineHandler,
-    //'variable declaration': assgnmentLineHandler,
+    'assignment expression': assgnmentLineHandler,
+    'variable declaration': varDecLineHandler,
     'return statement' : retLineHandler
 };
 
@@ -54,7 +54,7 @@ function substituteData(global_defs, data){
     return ans;
 }
 
-function substituteCode(codeString, substituted_data){
+function substituteCode(codeString, substituted_data, inputVector){
     var codeArray = codeString.match(/[^\r\n]+/g);
     var ans = [];
     var newLineNumSingelArray = [1];
@@ -68,11 +68,59 @@ function substituteCode(codeString, substituted_data){
             newLineNumSingelArray[0]++;
         }else if(lineType in lineHandlers){
             //updateLineNume(lineData,newLineNum);
-            ans.push.apply(ans ,lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray));
+            ans.push.apply(ans ,lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray, inputVector));
             //ans.push(lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray));
         }
     }
     return ans.join('\n');
+}
+function getInputVector(substitutedData, inputFromUser) {
+    var ans  = [];
+    ans.push.apply(ans ,getGlobals(substitutedData));
+    ans.push.apply(ans ,getParamsValues(substitutedData, inputFromUser));
+    return ans;
+}
+
+
+function getGlobals(substitutedData) {
+    var ans = [];
+    for (let i = 0; i <substitutedData.length ; i++){
+        var curr_element = substitutedData[i];
+        if(curr_element.Type == 'function declaration'){
+            i = substitutedData.length;
+        }else if(curr_element.Type =='variable declaration'){
+            ans.push(curr_element);
+        }
+    }
+    ans.push.apply(ans, getAfterFuncFlobals(substitutedData))
+    return ans;
+}
+
+function getAfterFuncFlobals(substitutedData) {
+    var ans = [];
+    var funcDecs = substitutedData.filter(x => x.Type== 'function declaration');
+    if(funcDecs.length == 0){
+        return ans;
+    }
+    var funcEndNum = funcDecs[0].loc.end.line;
+    ans.push.apply(ans,substitutedData.filter(x => x.Type== 'variable declaration' && x.Line >funcEndNum));
+    return ans;
+}
+
+function getParamsValues(substitutedData, inputFromUser) {
+    var ans = []
+    if (/^\w+(,\w+)*$/.test(inputFromUser)) {
+        var values = inputFromUser.split(',');
+        var currValIndex = 0;
+        for (let i = 0; i <substitutedData.length ; i++) {
+            var currElement = substitutedData[i];
+            if(currElement.Type == 'Param'){
+                currElement.Value = values[currValIndex++];
+                ans.push(currElement);
+            }
+        }
+    }
+    return ans;
 }
 
 function updateLineNum(lineData, newLineNum) {
@@ -396,6 +444,35 @@ function elseIfLineHandler(currLine, lineNum, lineData,lineNumberArray){
     return ans;
 }
 
+function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector){
+    var ans = [];
+    var assExp = lineData.filter(d => d.Type == 'assignment expression')[0];
+    if(!inInputVector(assExp, inputVector)){
+        return ans;
+    }
+    var strAns = '';
+    var idEquals = assExp.Name.concat(' = ');
+    var assEnd = ';';
+    ans.push(strAns.concat(idEquals,  assExp.Value, assEnd));
+    updateLineNum(lineData,lineNumberArray[0]);
+    lineNumberArray[0] +=1;
+    return ans;
+}
+
+function varDecLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector){
+    var ans = [];
+    var varDec = lineData.filter(d => d.Type == 'variable declaration')[0];
+    if(!inInputVector(varDec, inputVector)){
+        return ans;
+    }
+    var strAns = '';
+    var idEquals = 'let '.concat(varDec.Name,' = ');
+    var assEnd = ';';
+    ans.push(strAns.concat(idEquals,  varDec.Value, assEnd));
+    updateLineNum(lineData,lineNumberArray[0]);
+    lineNumberArray[0] +=1;
+    return ans;
+}
 function whileLineHandler(currLine, lineNum, lineData, lineNumberArray){
     var ans = [];
     var strAns = '';
@@ -413,6 +490,16 @@ function whileLineHandler(currLine, lineNum, lineData, lineNumberArray){
     return ans;
 }
 
+function inInputVector(element, inputVector) {
+    var elemenName = element.Name;
+    for (let i = 0; i < inputVector.length; i++) {
+        if(elemenName == inputVector[i].Name){
+            return true;
+        }
+    }
+    return false;
+}
+
 function adaptIfElse(currLine, ifElseStr) {
     currLine = currLine.replace('else if (', ifElseStr);
     return currLine;
@@ -426,3 +513,4 @@ export {substituteData};
 export {substituteCode};
 export {isFeasible};
 export {getUses};
+export {getInputVector};
