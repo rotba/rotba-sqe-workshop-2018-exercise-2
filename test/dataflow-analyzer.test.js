@@ -464,22 +464,22 @@ var data_17 = extractData(codeJson_17);
 var glbl_feds_17 = getGlobalDefs(data_17, codeString_17);
 var data_sub_17 = substituteData(glbl_feds_17,data_17);
 var res_17 = substituteCode(codeString_17, data_sub_17, getInputVector(data_sub_17, '1'));
+var codeString_18 =
+    `function foo(x, y, z){
+    let b = [6,5,5,5];
+    b[0] = 1;
+    if (b[0] < z) {
+        return b[2];
+    }
+}
+`;
+
+
 describe('The data flow analayzer', () => {
     it('is substituting properly while statement', () => {
         assert.equal(res_17, expected_17);
     });
 });
-
-
-var codeString_18 =
-    `function foo(x, y, z){
-    let b = [6,5,5,5];
-    b[0] = 1;
-    if (b[1] < z) {
-        return b[2];
-    }
-}
-`;
 
 var expected_18 =
     'function foo(x, y, z){\n' +
@@ -493,7 +493,7 @@ var data_18 = extractData(codeJson_18);
 var glbl_feds_18 = getGlobalDefs(data_18, codeString_18);
 var data_sub_18 = substituteData(glbl_feds_18,data_18);
 var res_18 = substituteCode(codeString_18, data_sub_18, getInputVector(data_sub_18, '[1]'));
-describe.only('The data flow analayzer', () => {
+describe('The data flow analayzer', () => {
     it('is substituting properly while statement', () => {
         assert.equal(res_18, expected_18);
     });

@@ -69,7 +69,7 @@ function substituteCode(codeString, substituted_data, inputVector){
             newLineNumSingelArray[0]++;
         }else if(lineType in lineHandlers){
             //updateLineNume(lineData,newLineNum);
-            ans.push.apply(ans ,lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray, inputVector));
+            ans.push.apply(ans ,lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray, inputVector, substituted_data));
             //ans.push(lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray));
         }
     }
@@ -191,7 +191,12 @@ function subRetHandler(data, subData, origElement, subElement, globalDefs, i) {
 
 function subAssginmentCondHandler(data, subData, origElement, subElement, globalDefs, i) {
     var codeJson = esprima.parseScript(origElement.Value).body[0].expression;
+    var codeJsonName = esprima.parseScript(origElement.Name).body[0].expression;
     subElement.Value = escodegen.generate(substituteExp(codeJson, subData, i, globalDefs));
+    if(subElement.Name.includes('[')){
+        subElement.Name = escodegen.generate(substituteExp(codeJsonName, subData, i, globalDefs));
+        handleArrayValueUpdate(subElement, subData, globalDefs);
+    }
     updateGlobalDef(globalDefs, subData[i], subElement.Value);
 }
 function updateGlobalDef(globalDefs, element, Value) {
@@ -290,7 +295,8 @@ function is_c_use_in_element(id, element){
     var name = element.Name;
     var c_use_in_value = value !=null&& value.includes(c_use_indicatorr);
     var c_use_in_name = name !=null&& name.includes(c_use_indicatorr);
-    return c_use_in_value || c_use_in_name;
+    var c_use_in_member = (name !=null)&& name.includes('['.concat(id,']'));
+    return c_use_in_value || c_use_in_name ||c_use_in_member ;
 }
 
 function is_p_use_in_element(id, element){
@@ -413,10 +419,17 @@ function mExspHandler(mExp , subData, i, globalDefs) {
     if(!(mExp.property.type == 'Literal'))
         mExp.property = exphandlers[mExp.property.type](mExp.property , subData, i, globalDefs);
     if(!isLocal(mExp.object.name, subData, i)){
-        updateArrayInputVector(mExp , subData, i, globalDefs);
+        //mExp.property = exphandlers[mExp.property.type](mExp.property, subData, i, globalDefs);
         return mExp;
     }
     var array  = getEsprimaArray(mExp , subData, i, globalDefs);
+    if(array!=null){
+        mExp = handleArrayStuff(mExp, array, subData, i, globalDefs);
+    }
+    return mExp;
+}
+
+function handleArrayStuff(mExp, array, subData, i, globalDefs){
     if(array[mExp.property.value].type == 'Literal')
         mExp = array[mExp.property.value];
     else
@@ -426,6 +439,7 @@ function mExspHandler(mExp , subData, i, globalDefs) {
 
 function getEsprimaArray(mExp, subData, i, globalDefs) {
     var globalDef = getGlobalDef(mExp.object.name, subData, i ,globalDefs);
+    if(globalDef ==undefined) return null;
     return esprima.parseScript(globalDef.Value).body[0].expression.elements;
 }
 
@@ -490,11 +504,11 @@ function elseIfLineHandler(currLine, lineNum, lineData,lineNumberArray){
     return ans;
 }
 
-function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector){
+function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector, substitutedData){
     var ans = [];
     var assExp = lineData.filter(d => d.Type == 'assignment expression')[0];
     if(!inInputVector(assExp, inputVector)){
-        //handleArrayValueUpdate()
+        //handleArrayValueUpdate(assExp, substitutedData);
         return ans;
     }
     var strAns = '';
@@ -503,8 +517,46 @@ function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, input
     ans.push(strAns.concat(idEquals,  assExp.Value, assEnd));
     updateLineNum(lineData,lineNumberArray[0]);
     lineNumberArray[0] +=1;
+    //handleArrayValueUpdate(assExp, inputVector);
     return ans;
 }
+
+
+function handleArrayValueUpdate(assExp,data, globalDefs) {
+    if(!(assExp.Name.includes('['))){
+        return;
+    }
+    var nameOfArray = extractArrayName(assExp.Name);
+    for (let i = data.length-1; i >=0 ; i--) {
+        if(isArrayDecl(nameOfArray,data[i])){
+            updateArrayValue(assExp, data[i], globalDefs);
+        }
+    }
+}
+function extractArrayName(Name) {
+    return Name.substring(0, Name.indexOf('['));
+}
+
+function isArrayDecl(nameOfArray, element) {
+    return element.Name == nameOfArray && element.Value.includes('[');
+}
+
+function updateArrayValue(assExp, arrayData, globalDefs) {
+    var idx = esprima.parseScript(assExp.Name).body[0].expression.property.value;
+    var arrayExp = esprima.parseScript(arrayData.Value).body[0].expression;
+    var elements = arrayExp.elements;
+    elements[idx] = esprima.parseScript(assExp.Value).body[0].expression;
+    arrayData.Value = escodegen.generate(arrayExp);
+    updateGlobalAfterArrayAss(arrayData, globalDefs);
+
+}
+function updateGlobalAfterArrayAss(arrayData, globalDefs){
+    var relevantDefs = globalDefs.filter(x=> x.def.id == arrayData.Name && x.def.loc.start.line == arrayData.Line);
+    for (let i = 0; i <relevantDefs.length ; i++) {
+        relevantDefs[i].def.Value = arrayData.Value;
+    }
+}
+
 
 function varDecLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector){
     var ans = [];
