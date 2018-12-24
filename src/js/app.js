@@ -29,23 +29,6 @@ $(document).ready(function () {
 });
 
 
-//Inserts the data to the html table
-function insertData(data, table){
-    for(var i =0; i < data.length; i++){
-        var row = table.insertRow(i+1);
-        var lineCell = row.insertCell(tableColsEnmt.Line);
-        var typeCell = row.insertCell(tableColsEnmt.Type);
-        var nameCell = row.insertCell(tableColsEnmt.Name);
-        var conditionCell = row.insertCell(tableColsEnmt.Condition);
-        var valueCell = row.insertCell(tableColsEnmt.Value);
-        lineCell.innerHTML = data[i]['Line'];
-        typeCell.innerHTML = data[i]['Type'];
-        nameCell.innerHTML = data[i]['Name'];
-        conditionCell.innerHTML = data[i]['Condition'];
-        valueCell.innerHTML = data[i]['Value'];
-    }
-}
-
 
 //Inserts the data to the html table
 function insertSubCode(subCode, table, substitutedData, inputFromUser){

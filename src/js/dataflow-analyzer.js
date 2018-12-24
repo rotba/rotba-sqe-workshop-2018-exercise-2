@@ -70,9 +70,7 @@ function substituteCode(codeString, substituted_data, inputVector){
             newLineNumSingelArray[0]++;
             //}else if(lineType in lineHandlers){ for coverage
         }else{
-            //updateLineNume(lineData,newLineNum);
             ans.push.apply(ans ,lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray, inputVector, substituted_data));
-            //ans.push(lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray));
         }
     }
     return ans.join('\n');
@@ -296,12 +294,13 @@ function is_c_use_in_element(id, element){
     c_use_indicatorr = c_use_indicatorr.concat(' ', id, ' ').replace('  ', ' ').replace('  ',' ');
     var value = element.Value.toString();
     var name = element.Name;
-    var c_use_in_value = value !=null&& value.includes(c_use_indicatorr);
+    var c_use_in_value = is_c_use_helper(value, name, c_use_indicatorr, id);
     var c_use_in_name = name !=null&& name.includes(c_use_indicatorr);
-    var c_use_in_member = (name !=null)&& name.includes('['.concat(id,']'));
-    return c_use_in_value || c_use_in_name ||c_use_in_member ;
+    return c_use_in_value || c_use_in_name ;
 }
-
+function is_c_use_helper(value, name, c_use_indicatorr, id){
+    return value !=null&& value.includes(c_use_indicatorr) ||(name !=null)&& name.includes('['.concat(id,']'));
+}
 function is_p_use_in_element(id, element){
     var p_use_indicatorr = '';
     p_use_indicatorr = p_use_indicatorr.concat(' ', id, ' ');
@@ -505,7 +504,7 @@ function elseIfLineHandler(currLine, lineNum, lineData,lineNumberArray){
     return ans;
 }
 
-function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector, substitutedData){
+function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector){
     var ans = [];
     var assExp = lineData.filter(d => d.Type == 'assignment expression')[0];
     if(!inInputVector(assExp, inputVector)){
