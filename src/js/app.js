@@ -22,7 +22,6 @@ $(document).ready(function () {
         var globalDefs = getGlobalDefs(data_array, codeToParse);
         var substitutedData = substituteData(globalDefs, data_array);
         var substitutedCode = substituteCode(codeToParse, substitutedData, getInputVector(substitutedData, $('#inputVector').val()));
-        //insertData(substitutedData, table);
         insertSubCode(substitutedCode, subTable, substitutedData, $('#inputVector').val());
 
     });

@@ -1,0 +1,257 @@
+diff --git a/package-lock.json b/package-lock.json
+index 419929a..8934bf2 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,6 +1,6 @@
+ {
+-    "name": "sample-project",
+-    "version": "1.0.1",
++    "name": "sample-project-2",
++    "version": "1.0.0",
+     "lockfileVersion": 1,
+     "requires": true,
+     "dependencies": {
+@@ -3170,7 +3170,8 @@
+                 "ansi-regex": {
+                     "version": "2.1.1",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "aproba": {
+                     "version": "1.2.0",
+@@ -3191,12 +3192,14 @@
+                 "balanced-match": {
+                     "version": "1.0.0",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "brace-expansion": {
+                     "version": "1.1.11",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "balanced-match": "^1.0.0",
+                         "concat-map": "0.0.1"
+@@ -3211,17 +3214,20 @@
+                 "code-point-at": {
+                     "version": "1.1.0",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "concat-map": {
+                     "version": "0.0.1",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "console-control-strings": {
+                     "version": "1.1.0",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "core-util-is": {
+                     "version": "1.0.2",
+@@ -3338,7 +3344,8 @@
+                 "inherits": {
+                     "version": "2.0.3",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "ini": {
+                     "version": "1.3.5",
+@@ -3350,6 +3357,7 @@
+                     "version": "1.0.0",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "number-is-nan": "^1.0.0"
+                     }
+@@ -3364,6 +3372,7 @@
+                     "version": "3.0.4",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "brace-expansion": "^1.1.7"
+                     }
+@@ -3371,12 +3380,14 @@
+                 "minimist": {
+                     "version": "0.0.8",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "minipass": {
+                     "version": "2.2.4",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "safe-buffer": "^5.1.1",
+                         "yallist": "^3.0.0"
+@@ -3395,6 +3406,7 @@
+                     "version": "0.5.1",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "minimist": "0.0.8"
+                     }
+@@ -3475,7 +3487,8 @@
+                 "number-is-nan": {
+                     "version": "1.0.1",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "object-assign": {
+                     "version": "4.1.1",
+@@ -3487,6 +3500,7 @@
+                     "version": "1.4.0",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "wrappy": "1"
+                     }
+@@ -3572,7 +3586,8 @@
+                 "safe-buffer": {
+                     "version": "5.1.1",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "safer-buffer": {
+                     "version": "2.1.2",
+@@ -3608,6 +3623,7 @@
+                     "version": "1.0.2",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "code-point-at": "^1.0.0",
+                         "is-fullwidth-code-point": "^1.0.0",
+@@ -3627,6 +3643,7 @@
+                     "version": "3.0.1",
+                     "bundled": true,
+                     "dev": true,
++                    "optional": true,
+                     "requires": {
+                         "ansi-regex": "^2.0.0"
+                     }
+@@ -3670,12 +3687,14 @@
+                 "wrappy": {
+                     "version": "1.0.2",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 },
+                 "yallist": {
+                     "version": "3.0.2",
+                     "bundled": true,
+-                    "dev": true
++                    "dev": true,
++                    "optional": true
+                 }
+             }
+         },
+diff --git a/package.json b/package.json
+index 9fda820..826a249 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+-    "name": "sample-project",
+-    "version": "1.0.1",
++    "name": "sample-project-2",
++    "version": "1.0.0",
+     "description": "",
+     "main": "index.js",
+     "scripts": {
+diff --git a/src/js/app.js b/src/js/app.js
+index 9b43d32..b27f497 100644
+--- a/src/js/app.js
++++ b/src/js/app.js
+@@ -29,23 +29,6 @@ $(document).ready(function () {
+ });
+
+
+-//Inserts the data to the html table
+-function insertData(data, table){
+-    for(var i =0; i < data.length; i++){
+-        var row = table.insertRow(i+1);
+-        var lineCell = row.insertCell(tableColsEnmt.Line);
+-        var typeCell = row.insertCell(tableColsEnmt.Type);
+-        var nameCell = row.insertCell(tableColsEnmt.Name);
+-        var conditionCell = row.insertCell(tableColsEnmt.Condition);
+-        var valueCell = row.insertCell(tableColsEnmt.Value);
+-        lineCell.innerHTML = data[i]['Line'];
+-        typeCell.innerHTML = data[i]['Type'];
+-        nameCell.innerHTML = data[i]['Name'];
+-        conditionCell.innerHTML = data[i]['Condition'];
+-        valueCell.innerHTML = data[i]['Value'];
+-    }
+-}
+-
+
+ //Inserts the data to the html table
+ function insertSubCode(subCode, table, substitutedData, inputFromUser){
+diff --git a/src/js/dataflow-analyzer.js b/src/js/dataflow-analyzer.js
+index dcd6d9d..3e263f0 100644
+--- a/src/js/dataflow-analyzer.js
++++ b/src/js/dataflow-analyzer.js
+@@ -70,9 +70,7 @@ function substituteCode(codeString, substituted_data, inputVector){
+             newLineNumSingelArray[0]++;
+             //}else if(lineType in lineHandlers){ for coverage
+         }else{
+-            //updateLineNume(lineData,newLineNum);
+             ans.push.apply(ans ,lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray, inputVector, substituted_data));
+-            //ans.push(lineHandlers[lineType](currLine, lineNum, lineData, newLineNumSingelArray));
+         }
+     }
+     return ans.join('\n');
+@@ -296,12 +294,13 @@ function is_c_use_in_element(id, element){
+     c_use_indicatorr = c_use_indicatorr.concat(' ', id, ' ').replace('  ', ' ').replace('  ',' ');
+     var value = element.Value.toString();
+     var name = element.Name;
+-    var c_use_in_value = value !=null&& value.includes(c_use_indicatorr);
++    var c_use_in_value = is_c_use_helper(value, name, c_use_indicatorr, id);
+     var c_use_in_name = name !=null&& name.includes(c_use_indicatorr);
+-    var c_use_in_member = (name !=null)&& name.includes('['.concat(id,']'));
+-    return c_use_in_value || c_use_in_name ||c_use_in_member ;
++    return c_use_in_value || c_use_in_name ;
++}
++function is_c_use_helper(value, name, c_use_indicatorr, id){
++    return value !=null&& value.includes(c_use_indicatorr) ||(name !=null)&& name.includes('['.concat(id,']'));
+ }
+-
+ function is_p_use_in_element(id, element){
+     var p_use_indicatorr = '';
+     p_use_indicatorr = p_use_indicatorr.concat(' ', id, ' ');
+@@ -505,7 +504,7 @@ function elseIfLineHandler(currLine, lineNum, lineData,lineNumberArray){
+     return ans;
+ }
+
+-function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector, substitutedData){
++function assgnmentLineHandler(currLine, lineNum, lineData,lineNumberArray, inputVector){
+     var ans = [];
+     var assExp = lineData.filter(d => d.Type == 'assignment expression')[0];
+     if(!inInputVector(assExp, inputVector)){
+(END)

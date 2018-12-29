@@ -392,14 +392,24 @@ function identifierHandler(iExp , subData, i, globalDefs) {
     if(isLocal(iExp.name, subData, i)){
         var identifier = iExp.name;
         var globalDef = getGlobalDef(identifier, subData, i ,globalDefs);
-
         iExp = esprima.parseScript(globalDef.Value).body[0].expression;
         return iExp;
     }else{
+        iExp = handleNotLocal(iExp , subData, i, globalDefs);
         return iExp;
     }
-
 }
+
+function handleNotLocal(iExp, subData, i, globalDefs) {
+    var identifier = iExp.name;
+    var globalDef = getGlobalDef(identifier, subData, i ,globalDefs);
+    if(globalDef ==null){
+        return iExp;
+    }
+    iExp = esprima.parseScript(globalDef.Value).body[0].expression;
+    return iExp;
+}
+
 function literalHandler(literalExp){
     return literalExp;
 
@@ -452,6 +462,7 @@ function getGlobalDef(identifier, subData, index ,globalDefs){
             return globalDefs[i].def;
         }
     }
+    return null;
 }
 
 function retLineHandler(currLine, lineNum, lineData, lineNumberArray){

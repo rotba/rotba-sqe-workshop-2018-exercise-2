@@ -403,7 +403,7 @@ var codeString_15 =
 var expected_15 =
     'let w = 1;\n' +
     '    function foo(z){\n' +
-    '    return w;\n' +
+    '    return 1;\n' +
     '}'
 
 var codeJson_15 = parseCode(codeString_15);
